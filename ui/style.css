@@ -1,0 +1,182 @@
+:root {
+  --ink: #1a1a1a;
+  --paper: #fafaf9;
+  --line: #d9d6d0;
+  --accent: #2a5d8f;
+  --established: #1c6e3f;
+  --warning: #8a5a00;
+  --danger: #9c2b2b;
+  --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.45;
+}
+
+.app-header {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.app-header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0;
+  color: #5c5c5c;
+  font-size: 0.9rem;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+section {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+textarea {
+  width: 100%;
+  min-height: 320px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0.5rem;
+  resize: vertical;
+}
+
+button {
+  font: inherit;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--ink);
+  border-radius: 3px;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #fff;
+  color: var(--ink);
+}
+
+button:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.fixture-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.fixture-list li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.85rem;
+}
+
+.fixture-list button {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+}
+
+.fixture-id {
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.fixture-clause {
+  display: block;
+  color: #5c5c5c;
+  font-size: 0.8rem;
+}
+
+.verdict-band {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.verdict-band.band-established,
+.verdict-band.band-probable {
+  color: var(--established);
+}
+
+.verdict-band.band-contested,
+.verdict-band.band-doubtful {
+  color: var(--warning);
+}
+
+.verdict-band.band-refuted,
+.verdict-band.band-unresolvable,
+.verdict-band.band-unsupported,
+.verdict-band.band-unfalsifiable {
+  color: var(--danger);
+}
+
+.condition-list {
+  margin: 0.25rem 0 0.75rem;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+}
+
+.parse-error,
+.refusal {
+  border-left: 3px solid var(--danger);
+  padding: 0.5rem 0.75rem;
+  background: #fdf2f2;
+  font-size: 0.9rem;
+}
+
+.refusal {
+  border-left-color: var(--warning);
+  background: #fdf7ec;
+}
+
+.version-stamp {
+  color: #7a7a7a;
+  font-size: 0.75rem;
+  font-family: var(--mono);
+  margin-top: 0.75rem;
+}

@@ -11,7 +11,7 @@ import { assembleVerdict } from './verdict/assemble.js';
 import { evaluateAggregate } from './aggregate/compound.js';
 import { ENGINE_VERSION, SCHEMA_VERSION } from './schema/version.js';
 
-export type { LedgerInput, CompoundInput, Verdict } from './schema/ledger.js';
+export type { LedgerInput, CompoundInput, CompoundSubClaim, Verdict } from './schema/ledger.js';
 export { ENGINE_VERSION, SCHEMA_VERSION } from './schema/version.js';
 
 function isTree2Extension(x: unknown): x is Tree2Extension {

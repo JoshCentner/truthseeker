@@ -12,7 +12,10 @@
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "dev": "vite",
+    "ui:build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "zod": "^3.23.8"
@@ -21,6 +24,8 @@
     "@types/node": "^20.14.0",
     "typescript": "^5.5.4",
     "vitest": "^2.1.9",
+    "jsdom": "^25.0.1",
+    "vite": "^5.4.11",
     "eslint": "^9.13.0",
     "@typescript-eslint/eslint-plugin": "^8.12.2",
     "@typescript-eslint/parser": "^8.12.2"

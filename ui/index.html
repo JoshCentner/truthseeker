@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GroundTruth Rule Engine — Dev UI</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Rule Engine Dev UI</h1>
+      <p class="subtitle">Paste or load a ledger. Run it. See the verdict, exactly as the engine computed it.</p>
+    </header>
+
+    <main class="app-layout">
+      <section id="fixture-library" aria-label="Fixture library"></section>
+      <section id="ledger-editor" aria-label="Ledger editor"></section>
+      <section id="verdict-display" aria-label="Verdict"></section>
+    </main>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
