@@ -44,6 +44,7 @@ One origin's grading.
 | `interestedParty` | `boolean` | Gates the interested-party table (FR-014). |
 | `partyControlledCreationAfterStakesVisible` | `boolean` | Only relevant when `startingGrade === 'contemporaneous_record'` and `interestedParty === true`; demotes to `'testimony'` when true (FR-014). |
 | `sourceReliabilityGrade` | `ReliabilityGrade` | Applied downward only; never upgrades or converts assertion into evidence (FR-015). |
+| `channelKeys` | `{ data, method, institution, motive: string \| null }` | Identifiers used to detect shared contamination channels (FR-016); two lines share a channel when both carry the same non-null key for it. Added during implementation — required to make clustering computable, not spelled out separately above. |
 | `finalGrade` | `WarrantGrade` | Computed: `startingGrade` after triggers, interested-party table, and reliability interaction. |
 
 ## Evidence Line

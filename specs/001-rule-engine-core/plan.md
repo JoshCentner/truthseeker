@@ -75,6 +75,30 @@ strengthen Principle IV rather than complicate it; `aggregate()`'s optional `pre
 (contracts/engine-api.md) keeps the function pure — it is an explicit input, not hidden state —
 so Principle I's determinism guarantee is unaffected. Gate still passes.
 
+**Post-implementation re-check (T060)**: two refinements emerged during implementation that
+data-model.md did not anticipate, both documented in-code and in data-model.md at the time:
+`Warrant.channelKeys` (clustering was uncomputable without a per-channel identifier — FR-016) and
+`TreeResult.band: Band | null` (Tree 4's decomposable branch routes to sub-claim trees rather than
+computing a band itself — FR-029). Neither touches a constitution principle: `channelKeys` is
+judgment data the ledger already implies, not a new computed field, so Principle IV's
+judgment/computed split is unaffected; the nullable band is exempted from FR-043's
+capping-condition requirement in `verdict/assemble.ts` specifically because it represents "no band
+computed here," not "a band capped below ceiling." Manually cross-checked three fixture verdicts
+(Tree 1 Established, Refuted, and Tree 3's Probable ceiling) against AGENT-PROTOCOL-v3.md's actual
+tree text directly — all three match the protocol's wording exactly (quickstart.md's SC-010
+check). Gate still passes; no unjustified complexity introduced.
+
+**T061 caught a real defect**: `aggregate/compound.ts` originally built its `Verdict` directly
+instead of routing through `verdict/assemble.ts`, so FR-043's "below-ceiling band must carry a
+capping condition" requirement silently didn't apply to any aggregation verdict — 4 of 19 fixture
+verdicts had empty `cappingConditions` despite being below the `'established'` ceiling. This
+would not have been caught by the fixture suite's own band/tree assertions (they don't check
+`cappingConditions`), only by SC-005's direct check. Fixed by having `evaluateAggregate()` return
+a `TreeResult` and call `assembleVerdict('aggregation', ...)` like every other tree, which also
+let it drop its own duplicate qualifier/version-stamping logic. Re-verified SC-002 (19/19), SC-005
+(0 missing), SC-006 (0 numeric values), SC-007 (0 conditions without a protocol clause), and
+SC-009 (refusal names the offending input) directly against engine output after the fix.
+
 ## Project Structure
 
 ### Documentation (this feature)

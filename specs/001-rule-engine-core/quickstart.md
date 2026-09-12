@@ -45,14 +45,27 @@ special-case around.
 
 ## Validate: determinism (SC-004)
 
+The suite itself asserts byte-identical output for two in-process calls with the same input
+(`FR-006/SC-004` test in `run-fixtures.test.ts`) — that's the primary check. To confirm it holds
+across separate process runs too (implementation note: a raw diff of `--reporter=json` output is
+noisy, since it embeds run timestamps and durations that differ between runs regardless of engine
+determinism):
+
 ```bash
-npm test -- --run tests/suite/run-fixtures.test.ts
-npm test -- --run tests/suite/run-fixtures.test.ts
-diff <(npm test -- --reporter=json 2>/dev/null) <(npm test -- --reporter=json 2>/dev/null)
+npx vitest run --reporter=json > /tmp/run1.json
+npx vitest run --reporter=json > /tmp/run2.json
+python3 -c "
+import json
+def outcomes(path):
+    data = json.load(open(path))
+    return sorted((t['fullName'], t['status']) for s in data['testResults'] for t in s['assertionResults'])
+print(outcomes('/tmp/run1.json') == outcomes('/tmp/run2.json'))
+"
 ```
 
-**Expected**: no diff. Every `Verdict` returned is byte-identical across runs for the same input —
-this is what research.md §2's sorting/no-nondeterministic-builtins discipline is verified against.
+**Expected**: `True`. Every fixture's pass/fail outcome is identical across independent process
+runs — this is what research.md §2's sorting/no-nondeterministic-builtins discipline is verified
+against.
 
 ## Validate: one case by hand (SC-010)
 
