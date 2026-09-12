@@ -8,6 +8,14 @@
 
 **Input**: User description: "Rule engine + schema + fixtures — the typed core schema, the four decision trees, aggregation, demotion tables, and the hand-worked fixture suite (Phase 0, GROUNDTRUTH-PLATFORM-BRIEF-v0.2.md §18)"
 
+## Clarifications
+
+### Session 2026-09-12
+
+- Q: Does the EXTRAORDINARY flag's Contested ceiling apply to Probable as well as Established, and must the qualifying cluster itself have survived adversarial testing? → A: Gates both Probable and Established; the qualifying cluster must have individually survived adversarial testing
+- Q: What should "comparable grade and cluster count" mean for a Contested – conflicting-evidence verdict? → A: Exact match required on both grade and cluster count; any mismatch means "not comparable" and the tree proceeds on whichever side is higher
+- Q: How many independently-failing supplementary sub-claims should trigger the one-step demotion of a compound claim's aggregated band? → A: 2 — matches the protocol's existing two-cluster corroboration-minimum threshold used everywhere else
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Normalize a populated ledger before any band is considered (Priority: P1)
@@ -288,20 +296,18 @@ evaluation performed.
 - **FR-030**: System MUST run both trees and report the lower band, showing both results, when the
   classification identifies two genuinely plausible types.
 - **FR-031**: System MUST apply the extraordinary-claim condition when the prior-plausibility
-  screen has fired. [NEEDS CLARIFICATION: the protocol's Step 1 screen states an extraordinary
-  claim's ceiling is Contested unless it holds at least one re-testable or physical-record cluster
-  that has survived adversarial testing, while Tree 1 states extraordinary claims "additionally
-  need one re-testable/physical cluster" only in the Established condition — does the flag gate
-  Probable as well, and is adversarial survival required of that specific cluster?]
+  screen has fired, capping the band at Contested for both Probable and Established unless the
+  ledger contains at least one re-testable or physical-record cluster that has itself survived
+  adversarial testing, independently of the tree's overall adversarial-status condition.
 - **FR-032**: System MUST distinguish Unsupported (nothing survives; a burden finding) from
   Refuted (affirmatively shown false or load-bearing evidence collapsed; a falsity finding), and
   MUST NOT substitute one for the other.
 - **FR-033**: System MUST return Unfalsifiable as a structural non-band verdict without running
   any tree when the falsifiability screen fires.
-- **FR-034**: System MUST determine Contested — conflicting evidence by comparing diagnostic
-  evidence on both sides. [NEEDS CLARIFICATION: the protocol requires "comparable grade and
-  cluster count" — does comparable mean exactly equal on both axes, or equal within one grade step
-  and one cluster, and which band results when the two axes disagree?]
+- **FR-034**: System MUST determine Contested — conflicting evidence only when diagnostic
+  evidence on both sides matches exactly on both grade and cluster count; whenever the two axes
+  do not match exactly, the ledger MUST proceed under the tree's ordinary conditions for whichever
+  side holds the higher grade or cluster count, rather than being treated as conflicting.
 
 #### Aggregation
 
@@ -309,9 +315,8 @@ evaluation performed.
   sub-claims.
 - **FR-036**: System MUST prevent supplementary sub-claims from raising a compound band.
 - **FR-037**: System MUST allow supplementary sub-claims to lower a compound band by exactly one
-  step only when several independently fail. [NEEDS CLARIFICATION: "several" is not quantified in
-  the protocol — what count of independently failing supplementary sub-claims triggers the
-  one-step demotion?]
+  step when two or more independently fail, matching the protocol's existing two-cluster
+  corroboration-minimum threshold used elsewhere.
 - **FR-038**: System MUST return Unresolvable for any compound with a load-bearing sub-claim
   banded Unresolvable.
 - **FR-039**: System MUST recompute an aggregated band from changed sub-claim bands alone,
