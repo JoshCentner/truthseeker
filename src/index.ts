@@ -11,7 +11,25 @@ import { assembleVerdict } from './verdict/assemble.js';
 import { evaluateAggregate } from './aggregate/compound.js';
 import { ENGINE_VERSION, SCHEMA_VERSION } from './schema/version.js';
 
-export type { LedgerInput, CompoundInput, CompoundSubClaim, Verdict } from './schema/ledger.js';
+export type {
+  LedgerInput,
+  CompoundInput,
+  CompoundSubClaim,
+  Verdict,
+  WarrantGrade,
+  ReliabilityGrade,
+  DiagnosticMark,
+  AdversarialStatus,
+  FiredTrigger,
+  Rival,
+  Origin,
+  Warrant,
+  DiagnosticityEntry,
+  ClaimType,
+  Tree2Extension,
+  Tree3Extension,
+  Tree4Extension,
+} from './schema/ledger.js';
 export { ENGINE_VERSION, SCHEMA_VERSION } from './schema/version.js';
 
 function isTree2Extension(x: unknown): x is Tree2Extension {

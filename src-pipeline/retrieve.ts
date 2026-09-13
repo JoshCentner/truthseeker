@@ -1,0 +1,86 @@
+import { createHash } from 'node:crypto';
+import type { CandidateOrigin, FetchRecord, RetrievedOrigin } from './types.js';
+import { appendJsonLine, FETCH_ARCHIVE_FILE } from './storage.js';
+import { classifyDomain } from './registry.js';
+
+const PAYWALL_SNIPPET_MARKERS = [
+  'subscribe to continue reading',
+  'this content is for subscribers',
+  'sign in to read the full article',
+  'create a free account to continue',
+];
+
+/** Accepted FR-014 clarification: a snippet-only paywall response is treated
+ * as could_not_retrieve, not a distinct partial state. This heuristic is
+ * intentionally conservative — a short response containing subscription
+ * language is exactly the "characterization of the source, not the source
+ * itself" shape FR-014's rationale describes. */
+function looksLikePaywallSnippet(content: string): boolean {
+  const lower = content.toLowerCase();
+  return PAYWALL_SNIPPET_MARKERS.some((marker) => lower.includes(marker)) && content.length < 500;
+}
+
+async function fetchOne(candidate: CandidateOrigin): Promise<{ fetch: FetchRecord; content: string | null }> {
+  const fetchedAt = new Date().toISOString();
+  try {
+    const response = await fetch(candidate.url, { redirect: 'follow' });
+    const body = await response.text();
+    const contentHash = createHash('sha256').update(body).digest('hex');
+    const record: FetchRecord = {
+      requestedUrl: candidate.url,
+      finalUrl: response.url,
+      succeeded: response.ok,
+      httpStatus: response.status,
+      contentHash,
+      fetchedAt,
+    };
+    if (!response.ok) {
+      return { fetch: record, content: null };
+    }
+    if (looksLikePaywallSnippet(body)) {
+      return { fetch: record, content: null };
+    }
+    return { fetch: record, content: body };
+  } catch {
+    // Network failure, DNS failure, etc. — still archived (FR-013), just with nulls where there's nothing to record.
+    return {
+      fetch: {
+        requestedUrl: candidate.url,
+        finalUrl: null,
+        succeeded: false,
+        httpStatus: null,
+        contentHash: null,
+        fetchedAt,
+      },
+      content: null,
+    };
+  }
+}
+
+/**
+ * FR-012-014: retrieves the real bytes of every candidate, independent of
+ * the search step's own grounding metadata (research.md §3). FR-013: every
+ * attempt is archived, success or failure.
+ */
+export async function retrieveAll(candidates: CandidateOrigin[]): Promise<RetrievedOrigin[]> {
+  const results: RetrievedOrigin[] = [];
+  let counter = 0;
+  for (const candidate of candidates) {
+    const { fetch: fetchRecord, content } = await fetchOne(candidate);
+    await appendJsonLine(FETCH_ARCHIVE_FILE, fetchRecord);
+    results.push({
+      id: `origin-${counter++}`,
+      candidate,
+      fetch: fetchRecord,
+      content,
+      registryClass: classifyDomain(candidate.url), // FR-037
+    });
+  }
+  return results;
+}
+
+/** FR-036: deterministic re-validation from an archived snapshot, no live re-fetch. */
+export function verifySnapshot(record: FetchRecord, content: string): boolean {
+  if (!record.contentHash) return false;
+  return createHash('sha256').update(content).digest('hex') === record.contentHash;
+}
