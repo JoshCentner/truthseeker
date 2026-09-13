@@ -104,6 +104,21 @@ export interface AdversarialOutput {
 // Run trace and final result (FR-033-036)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Bounded remediation (FR-040-045 — amendment)
+// ---------------------------------------------------------------------------
+
+export interface RemediationAttempt {
+  step: string;
+  attemptNumber: number;
+  violation: string | null;
+  succeeded: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Run trace and final result (FR-033-036)
+// ---------------------------------------------------------------------------
+
 export interface RunTrace {
   runId: string;
   requester: string | null;
@@ -111,13 +126,15 @@ export interface RunTrace {
   startedAt: string;
   completedAt: string;
   steps: { step: string; modelId: string; timestamp: string }[];
+  remediationAttempts: RemediationAttempt[];
 }
 
 export type PipelineResult =
   | { kind: 'rejected'; rule: string }
   | { kind: 'needs_review'; reason: string; queuedAt: string }
   | { kind: 'completed'; ledger: LedgerInput; trace: RunTrace }
-  | { kind: 'auth_failed'; message: string };
+  | { kind: 'auth_failed'; message: string }
+  | { kind: 'needs_clarification'; step: string; questions: string[] };
 
 export interface RunOptions {
   requester?: string;

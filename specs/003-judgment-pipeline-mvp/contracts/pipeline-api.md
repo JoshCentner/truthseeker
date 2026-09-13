@@ -32,12 +32,18 @@ actually valid ahead of time — an invalid key surfaces as a failure from the f
   ledger validation (FR-033) — a caller never needs to separately validate before calling
   `evaluate(result.ledger)`.
 - Throws only for programmer errors (e.g., calling with an empty `apiKey` string) — a real
-  authorization failure, a zero-sources-found run, and a harm-gate rejection are all normal return
-  values, never thrown exceptions, matching `001`'s own "return values for outcomes, exceptions
-  for bugs" convention (contracts/engine-api.md).
+  authorization failure, a zero-sources-found run, a harm-gate rejection, and a step that
+  exhausted its remediation attempts are all normal return values, never thrown exceptions,
+  matching `001`'s own "return values for outcomes, exceptions for bugs" convention
+  (contracts/engine-api.md).
+- Any individual step's LLM call is retried internally (bounded remediation, FR-040–FR-045)
+  before its failure ever surfaces to the caller — a caller only sees `needs_clarification` after
+  the fixed attempt limit is exhausted, never a raw parse error or a mid-step failure.
 
 **Postconditions**: for `kind: 'completed'`, `evaluate(result.ledger)` (imported from `001`)
-never returns a `refusalReason` (SC-004).
+never returns a `refusalReason` (SC-004). For `kind: 'needs_clarification'`, `trace` is not
+returned (research.md §10 — the run did not complete) but `step` and `questions` are always
+non-empty, naming exactly what remains unresolved.
 
 ## CLI: `src-pipeline/cli.ts`
 
@@ -50,8 +56,10 @@ echo "$MY_KEY" | node src-pipeline/cli.ts "claim text here" --key-stdin
 **Behavior**: reads the claim from its first positional argument and the key from
 `GEMINI_API_KEY` or `--key-stdin` (research.md §5) — **never** from a `--key` flag, since a flag
 value is visible in shell history and `ps` output on the same machine. Prints the `PipelineResult`
-as formatted JSON to stdout; a `needs_review` or `rejected` result exits with a distinct, non-zero
-status code from a `completed` one, so the CLI is scriptable.
+as formatted JSON to stdout; each `PipelineResult.kind` exits with its own distinct status code
+from `completed` (0), so the CLI is scriptable: `1` rejected, `2` needs_review, `3` auth_failed,
+`4` usage error, `6` needs_clarification (research.md §10's bounded-remediation amendment; `5` is
+reserved for an unexpected/uncaught error, distinct from every normal outcome above it).
 
 ## Explicitly not in this contract
 

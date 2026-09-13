@@ -259,3 +259,30 @@ retrieval, blind grading, or diagnosticity isn't a defensible MVP of this specif
 - Live validation (does Gemini's grounding actually find good sources, is its judgment sound) is
   explicitly not an automated task in this list — quickstart.md Part 2 covers it as a manual step
   for whoever runs this with a real key.
+
+---
+
+## Phase 11: User Story 8 - Bounded Remediation (Amendment, Priority: P1)
+
+Added after the original 64 tasks were complete, per a real gap the constitution's Development
+Workflow section required from the start (research.md §8-10, spec.md FR-040-045).
+
+**Goal**: Every step's LLM call is retried with the specific violation quoted back on a
+validation failure, up to a fixed limit, with every attempt traced — never a silent drop, a
+crash, or a fabricated default.
+
+**Independent Test**: spec.md's 4 acceptance scenarios for User Story 8.
+
+- [x] T065 Implement `remediate<T>(llm, buildPrompt, validate, maxAttempts)` in `src-pipeline/remediate.ts`: calls `buildPrompt(undefined)` on attempt 1, `buildPrompt(violationText)` on each retry, records a `RemediationAttempt` per call, returns `{ ok: true, value, attempts }` or `{ ok: false, attempts }` after `maxAttempts` (FR-040, FR-041, FR-043) (depends on data-model.md's `RemediationAttempt` type)
+- [x] T066 [P] Define `MAX_REMEDIATION_ATTEMPTS = 2` in `remediate.ts` as a named, documented constant (FR-042, research.md §9)
+- [x] T067 Add the `needs_clarification` variant to `PipelineResult` in `types.ts` (research.md §10) (depends on T065)
+- [x] T068 Update `run-pipeline.ts`: every step call (`classifyClaim`, `discoverCandidates`, `gradeOrigin` per origin, `markDiagnosticity` per origin, `generateRivals`, `runAdversarialTest`, and the harm gate's own classifier call) routes through `remediate()`; the orchestrator returns `{ kind: 'needs_clarification', step, questions }` immediately on any step's remediation exhaustion (FR-044) (depends on T065, T067)
+- [x] T069 Add `remediationAttempts: RemediationAttempt[]` to `RunTrace`, populated from every step's `remediate()` call (FR-043) (depends on T068)
+- [x] T070 Replace `grade.ts`'s `filterTriggersRequiringMechanism` silent-drop behavior: a fired trigger with no mechanism is now a validation failure that triggers remediation via `remediate()`, not a silently filtered array (FR-045) (depends on T065)
+- [x] T071 Update `cli.ts`: add exit code `6` for `needs_clarification`, distinct from every other outcome (contracts/pipeline-api.md) (depends on T067)
+- [x] T072 [P] `src-pipeline/tests/remediate.test.ts`: succeeds on attempt 1 with no retry; fails attempt 1, succeeds attempt 2, both attempts in the trace; fails every attempt up to the limit, returns `ok: false` with all attempts recorded; the retry prompt actually contains the specific violation text, not a generic message (depends on T066)
+- [x] T073 [P] Update `src-pipeline/tests/grade.test.ts`: a trigger with no mechanism now triggers a remediation retry (via a scripted `MockLlmClient` second response), never a silent drop (depends on T070)
+- [x] T074 [P] Update `src-pipeline/tests/run-pipeline.test.ts`: add a case where a step's mocked response is invalid on attempt 1 and valid on attempt 2, confirming the orchestrator still reaches `completed`; add a case where a step is invalid on every attempt, confirming `needs_clarification` (depends on T068)
+- [x] T075 Re-run the full suite, confirm offline (`unshare --net`), re-run `tsc`/`eslint`, and update plan.md's Constitution Check "Remediation is bounded" row from AMENDED to a plain PASS once implemented and verified
+
+**Checkpoint**: Every generative step in this pipeline now self-corrects on a validation failure within a bounded budget, and fails loud (a specific clarifying question) rather than quiet, matching the constitution's Development Workflow requirement in full.

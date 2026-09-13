@@ -79,6 +79,7 @@ single review-queue file (FR-002a).
 | Architecture and Cost Constraints — hosting stays at the phase it needs | **PASS** | This feature runs locally/in CI, never as a hosted public service — matching "the pipeline MUST NOT be hosted before public BYOK runs require it." |
 | Architecture and Cost Constraints — token cost is the governing cost | **PARTIAL (deferred, documented)** | Prompt caching and model tiering by step are named as "required optimizations, not optional ones," but tiering requires measuring cost against real runs first, which this MVP hasn't done yet. This MVP uses a single Gemini model tier throughout (research.md §2) and documents cost-per-claim as something to measure once real runs exist, not something to guess at now — consistent with the constitution's own "decided against measured outcomes, not assumption." |
 | Development Workflow — deterministic checks run on every run | **PASS** | The specific checks this section lists (retrievable URL + timestamp + hash, no aggregator misclassified, every fired trigger named) map directly onto FR-013, FR-021, and FR-037–FR-039; this feature implements the pipeline-side half, `001`'s own tests already cover the engine-side half (cluster count, zero-weight rule, band-matches-engine). |
+| Development Workflow — remediation is bounded | **PASS** | This line was originally folded into the row above and under-delivered: `grade.ts` silently dropped a fired trigger with no mechanism instead of remediating it. FR-040–FR-045 implement the constitution's exact requirement via a generic `remediate()` wrapper used by all six generative steps — a fixed attempt limit (`MAX_REMEDIATION_ATTEMPTS`), the specific violation quoted back via a deterministic template, every attempt in the trace (`RunTrace.remediationAttempts`), and a `needs_clarification` result rather than a crash or silent default when the limit is reached. Verified: 117/117 tests pass (up from 108), including an end-to-end case that retries once and completes, and one that exhausts all attempts and returns `needs_clarification` — confirmed offline, clean `tsc`, clean `eslint`. |
 | Development Workflow — fixture suite as merge gate | **N/A** | This feature adds no fixture cases and touches no file under `001`'s `src/trees/`, `src/normalize/`, or `src/aggregate/` — that suite is unaffected. |
 
 **Result**: Gate passes, with one item (model tiering) explicitly and honestly deferred rather than
@@ -118,6 +119,13 @@ during implementation:
 
 Gate passes. No unjustified complexity; both defects were caught before commit, not after.
 
+**Bounded-remediation amendment re-check**: closes the one gap the original implementation left
+open (grade.ts silently dropping instead of remediating a trigger missing its mechanism). All six
+generative steps now share one `remediate()` wrapper rather than six independent copies, which is
+itself a small design improvement over what a from-scratch implementation of FR-040-045 per step
+would have produced. 117/117 tests pass, confirmed offline, clean `tsc`, clean `eslint`, `001`'s
+own build unaffected. Gate passes with no remaining amendments outstanding.
+
 ## Project Structure
 
 ### Documentation (this feature)
@@ -141,31 +149,41 @@ way `001` did for `evaluate()`/`aggregate()`.
 
 ```text
 src-pipeline/
-├── harm-gate.ts                 # FR-001-002a: pre-flight classifier, 3-way outcome, review-queue write
-├── llm-client.ts                  # LlmClient interface + GeminiLlmClient implementation + MockLlmClient (test-only, exported for other features' tests to reuse)
-├── search.ts                       # FR-011, FR-015, FR-016: search-effort stopping condition, candidate discovery
-├── retrieve.ts                      # FR-012-014, FR-017-019, FR-036: fetch, archive, containment, offline re-check
-├── registry.ts                       # FR-037-039: seed structural registry (aggregator/press_release/preprint/paywalled)
-├── grade.ts                           # FR-020-025: blind warrant grading
-├── diagnosticity.ts                    # FR-026-027, FR-030: diagnosticity marking against claim and rivals
-├── rivals.ts                            # FR-028-029: rival hypothesis generation
-├── adversarial.ts                        # FR-031-032: adversarial testing / steelman
-├── assemble-ledger.ts                     # FR-033: assembles the final LedgerInput, validated with zod before return
-├── run-pipeline.ts                         # Orchestrates harm-gate -> search -> retrieve -> grade -> diagnosticity -> rivals -> adversarial -> assemble
-├── index.ts                                 # Public entry point: runPipeline(claim, apiKey) -> PipelineResult
-└── cli.ts                                    # Thin CLI wrapper around index.ts, for actually running this locally
+├── types.ts                      # Shared types (data-model.md)
+├── storage.ts                     # Append-only JSONL helper (review queue, fetch archive)
+├── harm-gate.ts                    # FR-001-002a: pre-flight classifier, 3-way outcome, review-queue write
+├── llm-client.ts                    # LlmClient interface + GeminiLlmClient implementation + MockLlmClient (test-only, exported for other features' tests to reuse)
+├── classify.ts                       # FR-036a: Step 1 claim-type classification + extraordinary flag (added during implementation)
+├── search.ts                          # FR-011, FR-015, FR-016: search-effort stopping condition, candidate discovery
+├── retrieve.ts                         # FR-012-014, FR-036: fetch, archive, offline re-check
+├── contain.ts                           # FR-017-019: fetched-content containment wrapper + instruction-echo detection (added during implementation)
+├── registry.ts                           # FR-037-039: seed structural registry (aggregator/press_release/preprint/paywalled)
+├── remediate.ts                           # FR-040-045: bounded remediation wrapper (this amendment) — wraps any LLM call + validation with the retry/quote-back/trace loop
+├── grade.ts                                # FR-020-025: blind warrant grading, now via remediate.ts
+├── diagnosticity.ts                         # FR-026-027, FR-030: diagnosticity marking against claim and rivals
+├── rivals.ts                                 # FR-028-029: rival hypothesis generation
+├── adversarial.ts                             # FR-031-032: adversarial testing / steelman
+├── assemble-ledger.ts                          # FR-033: assembles the final LedgerInput, validated with zod before return
+├── run-pipeline.ts                              # Orchestrates harm-gate -> classify -> search -> retrieve -> grade -> rivals -> diagnosticity -> adversarial -> assemble
+├── index.ts                                      # Public entry point: runPipeline(claim, apiKey) -> PipelineResult
+└── cli.ts                                         # Thin CLI wrapper around index.ts, for actually running this locally
 
 src-pipeline/tests/
 ├── harm-gate.test.ts
+├── llm-client.test.ts
+├── key-isolation.test.ts
+├── index.test.ts
 ├── search.test.ts
 ├── retrieve.test.ts
 ├── registry.test.ts
+├── contain.test.ts
+├── remediate.test.ts                # This amendment
 ├── grade.test.ts
 ├── diagnosticity.test.ts
 ├── rivals.test.ts
 ├── adversarial.test.ts
 ├── assemble-ledger.test.ts
-└── run-pipeline.test.ts                      # End-to-end against MockLlmClient only
+└── run-pipeline.test.ts               # End-to-end against MockLlmClient only
 ```
 
 **Structure Decision**: A new top-level `src-pipeline/` directory, parallel to `001`'s `src/` and

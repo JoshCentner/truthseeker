@@ -40,6 +40,8 @@ async function main(): Promise<void> {
       process.exit(2);
     case 'auth_failed':
       process.exit(3);
+    case 'needs_clarification':
+      process.exit(6);
   }
 }
 

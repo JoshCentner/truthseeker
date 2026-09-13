@@ -395,6 +395,78 @@ confirm adversarial testing surfaces that weakness rather than reporting an unqu
   judgment call the grading step invents fresh each time — matching Constitution Principle VI's
   "structural registry classes... are curated, definitional config."
 
+### User Story 8 - Bounded remediation instead of silent failure or a crash (Priority: P1)
+
+When any step's LLM-generated response fails deterministic validation — malformed JSON, a
+missing required field, or a business-rule violation like a fired trigger with no mechanism — the
+pipeline re-prompts that same step with the specific violation quoted back, up to a fixed attempt
+limit. If the limit is reached without a valid response, the pipeline surfaces a specific
+clarifying question naming what's still wrong, rather than crashing, silently discarding the
+invalid data, or fabricating a default to keep moving.
+
+**Why this priority**: The constitution requires this as a MUST ("Remediation is bounded... The
+trace MUST show every attempt"), not a nice-to-have. Today's implementation only partially covers
+this — the harm gate's `needs_review` outcome handles one specific case (uncertain
+classification), but a fired trigger missing a mechanism is currently just silently dropped by
+`grade.ts` rather than remediated, which quietly weakens the evidence record without anyone
+knowing it happened.
+
+**Independent Test**: Feed a step a response that's invalid JSON; confirm it re-prompts with the
+specific parse error quoted back and succeeds on a corrected retry, with both attempts visible in
+the trace. Then feed it invalid output on every attempt up to the limit; confirm a
+clarifying-question result, never a crash or a silent default.
+
+**Acceptance Scenarios**:
+
+1. **Given** a step's response fails deterministic validation, **When** remediation runs,
+   **Then** the step is re-invoked with a prompt that quotes the specific violation, never a
+   generic "try again."
+2. **Given** a step succeeds on a remediation attempt, **When** it does, **Then** the trace
+   records every attempt made, not only the final successful one.
+3. **Given** a step fails validation on every attempt up to the fixed limit, **When** the limit is
+   reached, **Then** the pipeline returns a clarifying-question result naming what's still wrong —
+   never a crash, a silently dropped violation, or a fabricated default value.
+4. **Given** a business-rule violation rather than malformed JSON — e.g. a fired trigger with no
+   mechanism (FR-021) — **When** remediation runs, **Then** the specific rule violated is quoted
+   back, not a generic parse-error message.
+
+---
+
+### Edge Cases (continued — Bounded Remediation)
+
+- What happens when the same violation recurs identically on every attempt (the model isn't
+  actually able to fix it)? The attempt limit still applies — this is exactly the case FR-044's
+  clarifying-question fallback exists for, not a reason to raise the limit.
+- What happens when a step's response is valid JSON but violates two business rules at once? Both
+  MUST be quoted back together, not just the first one found, so a single remediation round can
+  fix both rather than needing two round trips.
+
+## Requirements *(mandatory)*
+
+### Functional Requirements
+
+**Bounded remediation (cross-cutting — Constitution Development Workflow, User Story 8)**
+
+- **FR-040**: System MUST validate every LLM-generated structured response deterministically —
+  both that it parses and that it satisfies the calling step's own business rules — before
+  accepting it as that step's result.
+- **FR-041**: On a validation failure, System MUST re-invoke the same step with a prompt built
+  from a deterministic template that has the specific violation's details substituted in, never a
+  generic or freeform "please try again" retry.
+- **FR-042**: The remediation attempt limit MUST be a fixed, named constant applied per step per
+  call. (The exact number is an ordinary tuning constant, not a spec-level fork — like `search.
+  ts`'s existing `MAX_EMPTY_ATTEMPTS`, it starts at a conservative default and is revisited once
+  real runs provide observed failure-mode data, per the constitution's own "set from observed
+  failure modes, not guessed.")
+- **FR-043**: Every remediation attempt — successful or not — MUST be recorded in the run's trace,
+  including which step, the attempt number, and the specific violation that triggered the retry.
+- **FR-044**: When the attempt limit is reached without a valid response, System MUST return a
+  clarifying-question result identifying the specific unresolved issue. It MUST NOT crash, silently
+  discard the invalid data, or fabricate a default value to let the run continue.
+- **FR-045**: A business-rule violation MUST be treated as a remediation-triggering validation
+  failure — specifically, `grade.ts`'s existing behavior of silently filtering out a fired trigger
+  that has no named mechanism (FR-021) MUST be replaced with remediation, not silent dropping.
+
 ### Key Entities
 
 - **Run**: One end-to-end pipeline execution for one claim: the supplied claim text, the
@@ -411,6 +483,9 @@ confirm adversarial testing surfaces that weakness rather than reporting an unqu
   to test diagnosticity against, never treated as evidence.
 - **Registry Entry**: A curated, versioned mapping from a domain to a structural class
   (aggregator, press_release, preprint, paywalled) — reviewed data, never a fresh per-run guess.
+- **Remediation Attempt**: One retry of a step whose prior response failed deterministic
+  validation — the step name, attempt number, the specific violation quoted back, and whether this
+  attempt succeeded. Recorded in the run's trace regardless of outcome (FR-043).
 
 ## Success Criteria *(mandatory)*
 
@@ -433,6 +508,11 @@ confirm adversarial testing surfaces that weakness rather than reporting an unqu
   auto-accepted or auto-rejected, with the specific reason recorded in every case.
 - **SC-009**: 0 origins classed as an aggregator in the registry are graded as if they were the
   original source, checked against every produced ledger.
+- **SC-010**: 100% of remediation attempts, successful or not, appear in the run trace.
+- **SC-011**: 0 business-rule violations (e.g. a fired trigger with no mechanism) are silently
+  dropped — each either gets corrected via remediation or surfaces as a clarifying question.
+- **SC-012**: A step that fails validation on every attempt up to the limit produces a
+  clarifying-question result 100% of the time — never a crash, never a silent default.
 
 ## Assumptions
 

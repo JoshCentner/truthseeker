@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { runAdversarialTest } from '../adversarial.js';
 import { MockLlmClient } from '../llm-client.js';
 import type { RetrievedOrigin, GradingOutput } from '../types.js';
+import { unwrapOk } from './test-helpers.js';
 
 function origin(id: string, content: string | null): RetrievedOrigin {
   return {
@@ -27,7 +28,7 @@ function grade(startingGrade: GradingOutput['startingGrade']): GradingOutput {
 describe('adversarial testing (FR-031, FR-032)', () => {
   it("'untested' is the honest default when nothing survived grading — no LLM call made", async () => {
     const llm = new MockLlmClient([]);
-    const result = await runAdversarialTest('claim', [origin('o1', 'content')], [grade('assertion')], llm);
+    const result = unwrapOk(await runAdversarialTest('claim', [origin('o1', 'content')], [grade('assertion')], llm));
     expect(result.status).toBe('untested');
     expect(result.revisionOccurred).toBe(false);
     expect(llm.receivedPrompts.length).toBe(0);
@@ -35,13 +36,13 @@ describe('adversarial testing (FR-031, FR-032)', () => {
 
   it("'untested' when there are no origins at all", async () => {
     const llm = new MockLlmClient([]);
-    const result = await runAdversarialTest('claim', [], [], llm);
+    const result = unwrapOk(await runAdversarialTest('claim', [], [], llm));
     expect(result.status).toBe('untested');
   });
 
   it("'survived' requires a completed test that found no genuine weakness", async () => {
     const llm = new MockLlmClient([{ generate: { text: JSON.stringify({ foundGenuineWeakness: false, weaknessDescription: '' }) } }]);
-    const result = await runAdversarialTest('claim', [origin('o1', 'strong content')], [grade('physical_documentary')], llm);
+    const result = unwrapOk(await runAdversarialTest('claim', [origin('o1', 'strong content')], [grade('physical_documentary')], llm));
     expect(result.status).toBe('survived');
     expect(result.revisionOccurred).toBe(false);
   });
@@ -50,7 +51,7 @@ describe('adversarial testing (FR-031, FR-032)', () => {
     const llm = new MockLlmClient([
       { generate: { text: JSON.stringify({ foundGenuineWeakness: true, weaknessDescription: 'a real confound' }) } },
     ]);
-    const result = await runAdversarialTest('claim', [origin('o1', 'content')], [grade('contemporaneous_record')], llm);
+    const result = unwrapOk(await runAdversarialTest('claim', [origin('o1', 'content')], [grade('contemporaneous_record')], llm));
     expect(result.status).toBe('untested');
     expect(result.revisionOccurred).toBe(true);
   });

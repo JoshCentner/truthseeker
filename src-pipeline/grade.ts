@@ -2,6 +2,7 @@ import type { LlmClient } from './llm-client.js';
 import type { GradingRubric, GradingOutput, RetrievedOrigin } from './types.js';
 import type { WarrantGrade, ReliabilityGrade, FiredTrigger } from '../src/index.js';
 import { wrapUntrustedContent, detectInstructionEcho } from './contain.js';
+import { remediate, type RemediationResult } from './remediate.js';
 
 /**
  * FR-020: verbatim from AGENT-PROTOCOL-v3.md Step 3 — not a paraphrase. The
@@ -107,13 +108,41 @@ function mapReliabilityGrade(raw: RawGradingResponse['sourceReliabilityGrade']):
   }
 }
 
-/** FR-021: a trigger without a named mechanism is not a valid fired trigger —
- * dropped rather than silently accepted, since accepting it would let a
- * grade move without the accountability the protocol requires. */
-function filterTriggersRequiringMechanism(raw: RawGradingResponse['firedTriggers']): FiredTrigger[] {
-  return raw
-    .filter((t) => typeof t.mechanism === 'string' && t.mechanism.trim().length > 0)
-    .map((t) => ({ direction: t.direction, mechanism: t.mechanism as string }));
+const VALID_STARTING_GRADES = ['re_testable', 'physical_documentary', 'contemporaneous_record', 'testimony', 'assertion'];
+const VALID_RELIABILITY_GRADES = ['Strong', 'Mixed', 'Unknown', 'Poor', 'Fabricator'];
+
+/**
+ * FR-021, FR-040, FR-045: validates the raw grading response, including the
+ * business rule that every fired trigger must name a mechanism. A violation
+ * here — including a trigger missing its mechanism — now triggers
+ * remediation via remediate() below, replacing this file's original
+ * behavior of silently filtering the invalid trigger out of the array.
+ */
+function validateGradingResponse(raw: unknown): { ok: true; value: RawGradingResponse } | { ok: false; violation: string } {
+  if (typeof raw !== 'object' || raw === null) {
+    return { ok: false, violation: 'response was not a JSON object' };
+  }
+  const r = raw as Partial<RawGradingResponse>;
+  if (typeof r.startingGrade !== 'string' || !VALID_STARTING_GRADES.includes(r.startingGrade)) {
+    return { ok: false, violation: `"startingGrade" must be one of ${VALID_STARTING_GRADES.join(', ')}, got ${JSON.stringify(r.startingGrade)}` };
+  }
+  if (typeof r.sourceReliabilityGrade !== 'string' || !VALID_RELIABILITY_GRADES.includes(r.sourceReliabilityGrade)) {
+    return { ok: false, violation: `"sourceReliabilityGrade" must be one of ${VALID_RELIABILITY_GRADES.join(', ')}, got ${JSON.stringify(r.sourceReliabilityGrade)}` };
+  }
+  if (typeof r.interestedParty !== 'boolean' || typeof r.partyControlledCreationAfterStakesVisible !== 'boolean') {
+    return { ok: false, violation: '"interestedParty" and "partyControlledCreationAfterStakesVisible" must both be booleans' };
+  }
+  if (!Array.isArray(r.firedTriggers)) {
+    return { ok: false, violation: '"firedTriggers" must be an array (use [] if none fired)' };
+  }
+  const missingMechanism = r.firedTriggers.find((t) => typeof t.mechanism !== 'string' || t.mechanism.trim().length === 0);
+  if (missingMechanism) {
+    return {
+      ok: false,
+      violation: `a fired trigger (direction: ${missingMechanism.direction}) is missing its required "mechanism" — FR-021 requires naming the specific mechanism by which the missing safeguard could produce the claimed result even if false`,
+    };
+  }
+  return { ok: true, value: r as RawGradingResponse };
 }
 
 /**
@@ -124,20 +153,27 @@ function filterTriggersRequiringMechanism(raw: RawGradingResponse['firedTriggers
  * in 001's own src/normalize/weight.ts (stepUp() clamps at that grade
  * regardless of how many upgrade triggers fire) — not re-implemented here,
  * to avoid two places disagreeing about where the ceiling is.
+ * FR-040-045 (amendment): a validation failure — including a fired trigger
+ * missing its mechanism — now goes through remediate() instead of being
+ * silently dropped or crashing on a bad enum value.
  */
 export async function gradeOrigin(
   origin: RetrievedOrigin,
   llm: LlmClient,
   rubric: GradingRubric = DEFAULT_GRADING_RUBRIC,
-): Promise<GradingOutput> {
+): Promise<RemediationResult<GradingOutput>> {
   if (origin.content === null) {
     return {
-      startingGrade: 'assertion',
-      firedTriggers: [],
-      interestedParty: false,
-      partyControlledCreationAfterStakesVisible: false,
-      sourceReliabilityGrade: 'not_rated',
-      rawModelReasoning: 'origin could not be retrieved — graded as bare assertion without an LLM call (FR-022)',
+      ok: true,
+      attempts: [],
+      value: {
+        startingGrade: 'assertion',
+        firedTriggers: [],
+        interestedParty: false,
+        partyControlledCreationAfterStakesVisible: false,
+        sourceReliabilityGrade: 'not_rated',
+        rawModelReasoning: 'origin could not be retrieved — graded as bare assertion without an LLM call (FR-022)',
+      },
     };
   }
 
@@ -155,12 +191,20 @@ export async function gradeOrigin(
         ? `\n\nNOTE: this source is registry-classed as ${origin.registryClass}.`
         : '';
 
-  // FR-017: fetched content reaches the model only inside the delimited,
-  // explicitly-untrusted block — never interpolated raw into the prompt.
-  const prompt = `${rubric.text}\n\n${wrapUntrustedContent(origin.id, origin.content)}${registryNote}`;
-  const response = await llm.generate(prompt);
-  const cleaned = response.text.trim().replace(/^```(?:json)?\n?/, '').replace(/```$/, '');
-  const raw: RawGradingResponse = JSON.parse(cleaned);
+  const buildPrompt = (violation?: string): string => {
+    // FR-017: fetched content reaches the model only inside the delimited,
+    // explicitly-untrusted block — never interpolated raw into the prompt.
+    const base = `${rubric.text}\n\n${wrapUntrustedContent(origin.id, origin.content as string)}${registryNote}`;
+    return violation
+      ? `${base}\n\nYour previous response was invalid: ${violation}\nRespond again, correcting exactly that issue.`
+      : base;
+  };
+
+  const result = await remediate(`grade:${origin.id}`, llm, buildPrompt, validateGradingResponse);
+  if (!result.ok) {
+    return result;
+  }
+  const raw = result.value;
 
   // FR-018/FR-019: a fired trigger's mechanism (or the raw reasoning) that
   // echoes directive-shaped language present in the source content is
@@ -172,12 +216,16 @@ export async function gradeOrigin(
     : (raw.reasoning ?? '');
 
   return {
-    startingGrade: mapStartingGrade(raw.startingGrade),
-    firedTriggers: filterTriggersRequiringMechanism(raw.firedTriggers),
-    interestedParty: raw.interestedParty,
-    partyControlledCreationAfterStakesVisible: raw.partyControlledCreationAfterStakesVisible,
-    sourceReliabilityGrade: mapReliabilityGrade(raw.sourceReliabilityGrade),
-    rawModelReasoning,
+    ok: true,
+    attempts: result.attempts,
+    value: {
+      startingGrade: mapStartingGrade(raw.startingGrade),
+      firedTriggers: raw.firedTriggers.map((t) => ({ direction: t.direction, mechanism: t.mechanism as string })),
+      interestedParty: raw.interestedParty,
+      partyControlledCreationAfterStakesVisible: raw.partyControlledCreationAfterStakesVisible,
+      sourceReliabilityGrade: mapReliabilityGrade(raw.sourceReliabilityGrade),
+      rawModelReasoning,
+    },
   };
 }
 

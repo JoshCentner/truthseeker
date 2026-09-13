@@ -142,3 +142,62 @@ looser paraphrase of the intent.
 injection without an explicit containment convention — the constitution treats this as "a live
 attack," not a solved problem, so an explicit, auditable mechanism is worth the small extra prompt
 overhead.
+
+## 8. Bounded remediation as a generic wrapper, not per-step logic (amendment)
+
+**Decision**: One generic function, `remediate<T>(llm, buildPrompt, validate, maxAttempts)`, wraps
+any step's "call the LLM, parse and validate the response" pattern. `buildPrompt` is a
+`(violationFeedback?: string) => string` closure the step supplies; on a validation failure,
+`remediate` calls it again with the specific violation text, producing a new prompt via
+deterministic string substitution into a fixed template — never a freeform "please fix this"
+handed to the model with no specifics.
+
+**Rationale**: Every step in this pipeline (`harm-gate.ts`, `classify.ts`, `grade.ts`,
+`diagnosticity.ts`, `rivals.ts`, `adversarial.ts`) already follows the identical shape: build a
+prompt, call the LLM, strip code fences, `JSON.parse`, check the shape. Writing the retry/quote-
+back/trace-recording logic six times would mean six chances for it to drift out of sync;
+one wrapper means the constitution's "remediation is bounded" requirement is enforced identically
+everywhere it applies, including in future steps.
+
+**Alternatives considered**: Per-step remediation logic — more control per step, but the actual
+shape of the loop (call, validate, retry with the violation quoted back, record every attempt,
+give up after N) has no reason to differ step to step, and per-step copies are exactly the kind of
+duplication that silently drifts (as `grade.ts`'s own bug — dropping instead of remediating —
+already demonstrated once).
+
+## 9. Attempt limit: a conservative constant, not a spec-level fork
+
+**Decision**: `MAX_REMEDIATION_ATTEMPTS = 2` (up to 3 total attempts: 1 original + 2 retries),
+defined once in `remediate.ts`.
+
+**Rationale**: Same reasoning as `search.ts`'s `MAX_EMPTY_ATTEMPTS` (already an established
+pattern in this codebase): the *shape* of the requirement (a fixed, bounded limit) is a spec-level
+decision already made by FR-042; the exact number is an ordinary tuning constant with no protocol-
+specified value, and the constitution itself says this number "MUST be set from observed failure
+modes, not guessed" — which this MVP, having produced zero real runs yet, cannot yet do
+honestly. Two retries is a conservative starting point: enough to recover from a one-off
+formatting slip, not so many that a model that's genuinely stuck burns disproportionate cost
+before surfacing a clarifying question.
+
+**Alternatives considered**: Zero retries (fail to clarifying-question immediately) — cheaper, but
+throws away the case where a single quoted-back violation would have fixed it, per FR-041's whole
+premise. A much higher limit (5+) — the constitution's own cost-consciousness ("token cost is the
+governing cost") argues against spending indefinitely on a step that isn't converging.
+
+## 10. Clarifying-question result: a fourth outcome, generalizing what the harm gate already does
+
+**Decision**: `PipelineResult` gains a `{ kind: 'needs_clarification'; step: string; questions:
+string[] }` variant. `remediate()` returns this (via the orchestrator) when `maxAttempts` is
+exhausted, naming the step and the specific unresolved violation(s) as plain-language questions.
+
+**Rationale**: The harm gate's existing `needs_review` outcome is already exactly this pattern for
+one specific case (classification uncertainty) — FR-044 generalizes the same idea (don't force a
+decision when the system genuinely can't produce a valid one) to every step. Keeping it a distinct
+`PipelineResult` variant rather than overloading `needs_review` preserves the harm gate's own
+outcome as specifically about scope/policy, not mechanical validation failure — a caller (or a
+future dashboard) can distinguish "this claim needs human policy judgment" from "this run hit a
+technical snag it couldn't self-correct."
+
+**Alternatives considered**: Reusing `needs_review` for both cases — conflates two genuinely
+different situations (a policy question vs. a mechanical remediation failure) that a human
+reviewer would want to triage differently.

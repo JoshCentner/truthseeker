@@ -28,6 +28,9 @@ proves:
   `evaluate()` accepts without a `refusalReason` (SC-004).
 - An aggregator-domain origin (per the seed registry) is never graded as if it were the original
   source (SC-009).
+- A step whose mocked response is invalid on the first attempt but valid on a retry succeeds, with
+  both attempts visible in the trace (SC-010); a step invalid on every attempt up to the limit
+  produces `needs_clarification`, never a crash (SC-012).
 
 ## Part 2: live validation (needs your own Gemini API key)
 

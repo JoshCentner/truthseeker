@@ -5,6 +5,7 @@ import path from 'node:path';
 import { MockLlmClient } from '../llm-client.js';
 import { runHarmGate } from '../harm-gate.js';
 import { REVIEW_QUEUE_FILE } from '../storage.js';
+import { unwrapOk } from './test-helpers.js';
 
 let scratchDir: string;
 
@@ -23,7 +24,7 @@ describe('harm gate (FR-001-002a)', () => {
     const llm = new MockLlmClient([
       { generate: { text: JSON.stringify({ outcome: 'reject', rule: 'names a private individual and targets their private life' }) } },
     ]);
-    const result = await runHarmGate('Jane Doe from 4th Street cheated on her taxes', llm, 'run-1');
+    const result = unwrapOk(await runHarmGate('Jane Doe from 4th Street cheated on her taxes', llm, 'run-1'));
     expect(result.outcome).toBe('reject');
     if (result.outcome === 'reject') {
       expect(result.rule.length).toBeGreaterThan(0);
@@ -31,9 +32,9 @@ describe('harm gate (FR-001-002a)', () => {
     }
   });
 
-  it('accepts a claim about a public figure\'s public conduct', async () => {
+  it("accepts a claim about a public figure's public conduct", async () => {
     const llm = new MockLlmClient([{ generate: { text: JSON.stringify({ outcome: 'accept' }) } }]);
-    const result = await runHarmGate('The mayor voted against the proposed budget last year', llm, 'run-2');
+    const result = unwrapOk(await runHarmGate('The mayor voted against the proposed budget last year', llm, 'run-2'));
     expect(result.outcome).toBe('accept');
   });
 
@@ -41,7 +42,7 @@ describe('harm gate (FR-001-002a)', () => {
     const llm = new MockLlmClient([
       { generate: { text: JSON.stringify({ outcome: 'reject', rule: 'not falsifiable-shaped — no observation could show it false' }) } },
     ]);
-    const result = await runHarmGate('Everything happens for a reason', llm, 'run-3');
+    const result = unwrapOk(await runHarmGate('Everything happens for a reason', llm, 'run-3'));
     expect(result.outcome).toBe('reject');
     if (result.outcome === 'reject') {
       expect(result.rule).toMatch(/falsifiab/i);
@@ -52,7 +53,7 @@ describe('harm gate (FR-001-002a)', () => {
     const llm = new MockLlmClient([
       { generate: { text: JSON.stringify({ outcome: 'needs_review', reason: 'unclear whether this person is a public figure' }) } },
     ]);
-    const result = await runHarmGate('Some semi-public local blogger did X', llm, 'run-4');
+    const result = unwrapOk(await runHarmGate('Some semi-public local blogger did X', llm, 'run-4'));
     expect(result.outcome).toBe('needs_review');
     if (result.outcome === 'needs_review') {
       expect(result.reason.length).toBeGreaterThan(0);
@@ -64,15 +65,32 @@ describe('harm gate (FR-001-002a)', () => {
     expect(entry.reason.length).toBeGreaterThan(0);
   });
 
-  it('makes exactly one LLM call regardless of outcome — the gate itself is the only spend', async () => {
+  it('makes exactly one LLM call when the first response is already valid', async () => {
     const llm = new MockLlmClient([{ generate: { text: JSON.stringify({ outcome: 'accept' }) } }]);
     await runHarmGate('An institution changed its policy', llm, 'run-5');
     expect(llm.receivedPrompts.length).toBe(1);
   });
 
-  it('treats unparseable classifier output as needs_review with a specific reason, never a crash', async () => {
-    const llm = new MockLlmClient([{ generate: { text: 'not json at all' } }]);
-    const result = await runHarmGate('Some claim', llm, 'run-6');
-    expect(result.outcome).toBe('needs_review');
+  it('remediates unparseable classifier output — retries with the violation quoted back, succeeds on a valid retry', async () => {
+    const llm = new MockLlmClient([
+      { generate: { text: 'not json at all' } },
+      { generate: { text: JSON.stringify({ outcome: 'accept' }) } },
+    ]);
+    const result = unwrapOk(await runHarmGate('Some claim', llm, 'run-6'));
+    expect(result.outcome).toBe('accept');
+    expect(llm.receivedPrompts[1]).toContain('not valid JSON');
+  });
+
+  it('returns ok:false (never a crash or a silent needs_review) when every attempt is unparseable', async () => {
+    const llm = new MockLlmClient([
+      { generate: { text: 'not json' } },
+      { generate: { text: 'still not json' } },
+      { generate: { text: 'still not json' } },
+    ]);
+    const result = await runHarmGate('Some claim', llm, 'run-7');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.attempts.length).toBe(3);
+    }
   });
 });

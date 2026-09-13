@@ -164,19 +164,34 @@ interface RunTrace {
   startedAt: string;
   completedAt: string;
   steps: { step: string; modelId: string; timestamp: string }[];
+  remediationAttempts: RemediationAttempt[]; // FR-043, added in the bounded-remediation amendment
+}
+
+/** FR-040-045 (bounded-remediation amendment). One retry of a step whose prior
+ * response failed deterministic validation. */
+interface RemediationAttempt {
+  step: string;
+  attemptNumber: number; // 1 = the original call, 2+ = a remediation retry
+  violation: string | null; // null only on the attempt that succeeded
+  succeeded: boolean;
 }
 
 type PipelineResult =
   | { kind: 'rejected'; rule: string }
   | { kind: 'needs_review'; reason: string; queuedAt: string }
   | { kind: 'completed'; ledger: LedgerInput; trace: RunTrace }
-  | { kind: 'auth_failed'; message: string };
+  | { kind: 'auth_failed'; message: string }
+  | { kind: 'needs_clarification'; step: string; questions: string[] };
 ```
 
 `auth_failed` was added during implementation — FR-010 requires an authorization failure be
 distinguished from every other failure category, and the original 3-variant union had no distinct
 case for it (an invalid key would otherwise have had to masquerade as one of the other three,
 which is exactly what FR-010 rules out).
+
+`needs_clarification` was added in the bounded-remediation amendment (research.md §10) — distinct
+from `needs_review`, which stays specifically about harm-gate policy uncertainty, not mechanical
+validation failure.
 
 `kind: 'completed'`'s `ledger` is validated with the same Zod schema `001`'s own `evaluate()` uses
 internally, before `run-pipeline.ts` ever returns it (FR-033, SC-004) — a `PipelineResult` never
