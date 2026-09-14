@@ -16,7 +16,8 @@
     "dev": "vite",
     "ui:build": "vite build",
     "preview": "vite preview",
-    "pipeline": "tsx src-pipeline/cli.ts"
+    "pipeline": "tsx src-pipeline/cli.ts",
+    "dashboard:server": "tsx dashboard/server.ts"
   },
   "dependencies": {
     "@google/genai": "^2.22.0",

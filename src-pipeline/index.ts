@@ -6,6 +6,17 @@ import type { PipelineResult, RunOptions } from './types.js';
 export type { PipelineResult, RunOptions } from './types.js';
 export { MockLlmClient, LlmAuthError, GeminiLlmClient } from './llm-client.js';
 export type { LlmClient } from './llm-client.js';
+/**
+ * 004 (claim-dashboard) amendment: exposed so a caller that needs to drive
+ * the orchestration with its own LlmClient — a real one it constructs
+ * itself, or MockLlmClient for tests — can do so directly, without
+ * duplicating run-pipeline.ts's step sequence. runPipeline() below remains
+ * the recommended entry point for anything that just needs "claim + key in,
+ * result out"; this export is for a caller (like the dashboard's server)
+ * that specifically needs client injection runPipeline()'s own
+ * apiKey-in/GeminiLlmClient-out shape doesn't allow.
+ */
+export { runOrchestration } from './run-pipeline.js';
 
 /**
  * FR-007: requires a caller-supplied key; never falls back to an

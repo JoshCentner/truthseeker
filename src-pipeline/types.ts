@@ -139,4 +139,9 @@ export type PipelineResult =
 export interface RunOptions {
   requester?: string;
   modelId?: string;
+  /** 004 (claim-dashboard) amendment: additive and optional — no existing
+   * caller is affected. Called immediately after each step is recorded in
+   * the trace, so a caller can surface live progress during a real,
+   * multi-minute run. */
+  onProgress?: (step: string) => void;
 }

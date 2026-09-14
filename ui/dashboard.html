@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GroundTruth — Check a Claim</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./dashboard-style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Check a Claim</h1>
+      <p class="subtitle">Submit a claim and your own API key. We'll check it against real sources and show you why.</p>
+    </header>
+
+    <main class="dashboard-layout">
+      <form id="claim-form">
+        <label for="claim-input">Claim</label>
+        <textarea id="claim-input" placeholder="e.g. The Great Wall of China is visible from space with the naked eye." required></textarea>
+
+        <label for="key-input">Your API key</label>
+        <input id="key-input" type="password" placeholder="Gemini API key" autocomplete="off" required />
+        <p class="key-note">Used only for this request. Never stored, logged, or sent anywhere else.</p>
+
+        <button type="submit">Check this claim</button>
+      </form>
+
+      <section id="dashboard-results" aria-label="Result"></section>
+    </main>
+
+    <script type="module" src="./dashboard-main.ts"></script>
+  </body>
+</html>

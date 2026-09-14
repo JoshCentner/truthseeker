@@ -68,4 +68,17 @@ describe('retrieve (FR-012-014, FR-036)', () => {
     expect(origin!.content).toBeNull();
     expect(origin!.fetch.succeeded).toBe(true); // the HTTP request itself succeeded — only content is withheld
   });
+
+  it("uses the candidate's own URL as the origin id, since 001's schema carries no separate URL field (FR-007 of 004)", async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('content', { status: 200 })));
+    const [origin] = await retrieveAll([candidate('https://real.example.com/article')]);
+    expect(origin!.id).toBe('https://real.example.com/article');
+  });
+
+  it('deduplicates ids with a numeric suffix only when two candidates share the exact same URL', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('content', { status: 200 })));
+    const [first, second] = await retrieveAll([candidate('https://real.example.com/dup'), candidate('https://real.example.com/dup')]);
+    expect(first!.id).toBe('https://real.example.com/dup');
+    expect(second!.id).toBe('https://real.example.com/dup#1');
+  });
 });

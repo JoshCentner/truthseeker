@@ -37,7 +37,10 @@ export async function runOrchestration(
   const startedAt = new Date().toISOString();
   const steps: RunTrace['steps'] = [];
   const remediationAttempts: RemediationAttempt[] = [];
-  const stamp = (step: string) => steps.push({ step, modelId: llm.modelId, timestamp: new Date().toISOString() });
+  const stamp = (step: string) => {
+    steps.push({ step, modelId: llm.modelId, timestamp: new Date().toISOString() });
+    options.onProgress?.(step); // 004 (claim-dashboard) amendment — additive, optional
+  };
 
   /** Unwraps a RemediationResult<T>: on failure, throws a sentinel this
    * function catches at the top level to build `needs_clarification` —

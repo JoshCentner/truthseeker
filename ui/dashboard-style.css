@@ -1,0 +1,117 @@
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+#claim-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1rem;
+  background: #fff;
+}
+
+#claim-form textarea {
+  min-height: 120px;
+  font-family: var(--sans);
+}
+
+#claim-form input[type='password'] {
+  padding: 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.key-note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #5c5c5c;
+}
+
+#dashboard-results {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1rem;
+  background: #fff;
+  min-height: 200px;
+}
+
+.phase-running {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.spinner {
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.outcome-rejected,
+.connection-error {
+  border-left: 3px solid var(--danger);
+  padding: 0.5rem 0.75rem;
+  background: #fdf2f2;
+}
+
+.outcome-needs-review,
+.outcome-needs-clarification {
+  border-left: 3px solid var(--warning);
+  padding: 0.5rem 0.75rem;
+  background: #fdf7ec;
+}
+
+.outcome-auth-failed {
+  border-left: 3px solid var(--danger);
+  padding: 0.5rem 0.75rem;
+  background: #fdf2f2;
+}
+
+.outcome-completed .band {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.evidence-list {
+  list-style: none;
+  padding: 0;
+}
+
+.evidence-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.85rem;
+}
+
+.evidence-item.mark-consistent {
+  border-left: 3px solid var(--established);
+  padding-left: 0.5rem;
+}
+
+.evidence-item.mark-inconsistent {
+  border-left: 3px solid var(--danger);
+  padding-left: 0.5rem;
+}

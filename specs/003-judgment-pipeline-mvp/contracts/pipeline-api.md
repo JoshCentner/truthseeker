@@ -63,6 +63,13 @@ reserved for an unexpected/uncaught error, distinct from every normal outcome ab
 
 ## Explicitly not in this contract
 
+- `runOrchestration` (exported from `index.ts` as of the `004` claim-dashboard amendment) is a
+  secondary, lower-level entry point for a caller that needs to inject its own `LlmClient` —
+  `runPipeline()` above remains the recommended surface for the ordinary "claim + key in, result
+  out" case. A caller using `runOrchestration` directly takes on `runPipeline`'s own
+  apiKey-required check and `LlmAuthError` → `auth_failed` mapping itself (see `004`'s
+  `dashboard/run-with-progress.ts` for the reference implementation of both).
+
 - Any HTTP/RPC server — `runPipeline` is an in-process async function, not a service.
 - The `runs/review-queue.jsonl` and fetch-archive file formats (data-model.md) — internal storage
   detail, not part of what a caller depends on; a future persistence feature may migrate these

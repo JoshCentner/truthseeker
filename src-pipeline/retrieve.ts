@@ -61,15 +61,27 @@ async function fetchOne(candidate: CandidateOrigin): Promise<{ fetch: FetchRecor
  * FR-012-014: retrieves the real bytes of every candidate, independent of
  * the search step's own grounding metadata (research.md §3). FR-013: every
  * attempt is archived, success or failure.
+ *
+ * Origin ids are the candidate's own URL, not an arbitrary counter — 001's
+ * Origin.id is an opaque string as far as the engine is concerned, but this
+ * feature's own downstream consumers (004's dashboard, FR-007's "every
+ * origin's URL") need the id to actually BE the URL, since 001's schema
+ * carries no separate URL field. A numeric suffix is appended only on an
+ * actual collision (the rare case where two candidates resolve to the exact
+ * same URL), so ids stay both unique and, in the overwhelmingly common case,
+ * exactly the human-readable URL.
  */
 export async function retrieveAll(candidates: CandidateOrigin[]): Promise<RetrievedOrigin[]> {
   const results: RetrievedOrigin[] = [];
-  let counter = 0;
+  const seenUrls = new Map<string, number>();
   for (const candidate of candidates) {
     const { fetch: fetchRecord, content } = await fetchOne(candidate);
     await appendJsonLine(FETCH_ARCHIVE_FILE, fetchRecord);
+    const seenCount = seenUrls.get(candidate.url) ?? 0;
+    seenUrls.set(candidate.url, seenCount + 1);
+    const id = seenCount === 0 ? candidate.url : `${candidate.url}#${seenCount}`;
     results.push({
-      id: `origin-${counter++}`,
+      id,
       candidate,
       fetch: fetchRecord,
       content,

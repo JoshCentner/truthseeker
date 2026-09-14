@@ -27,3 +27,9 @@ them hasn't been specified yet.
   currently get conservative, honestly-capped placeholder `treeExtension` values rather than full
   reasoning. Worth its own feature once `003`'s simple-factual path is validated live. Added
   2026-09-13.
+- **Interactive resume for `needs_clarification`** — `004-claim-dashboard`'s dashboard requires a
+  fresh submission when a run returns `needs_clarification`, rather than letting a visitor answer
+  the displayed question(s) and continue the same run. Resuming needs persisted in-progress run
+  state and an extension to `003`'s `remediate()` loop to accept human-supplied context it wasn't
+  built for — real, wanted follow-up work once `004`'s fresh-submission version is validated live.
+  Added 2026-09-14.

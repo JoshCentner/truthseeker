@@ -6,6 +6,6 @@
     "types": ["node", "vitest/globals", "vite/client"],
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "ui/**/*.ts", "src-pipeline/**/*.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "ui/**/*.ts", "src-pipeline/**/*.ts", "dashboard/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
