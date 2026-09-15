@@ -1,20 +1,9 @@
 import type { LlmClient } from './llm-client.js';
-import type { AdversarialOutput, GradingOutput, RetrievedOrigin } from './types.js';
+import type { AdversarialOutput, DiagnosticityOutput, GradingOutput, RetrievedOrigin } from './types.js';
 import type { AdversarialStatus } from '../src/index.js';
 import { wrapUntrustedContent } from './contain.js';
 import { remediate, type RemediationResult } from './remediate.js';
 
-/**
- * FR-031, FR-032. MVP scope decision, tracked in PROJECT-TRACKER.md: this
- * step can DETECT a genuine new weakness in the lead evidence that grading
- * missed, and reports that via revisionOccurred — but it does not yet feed
- * that weakness back into a re-graded Warrant (that would mean re-running
- * gradeOrigin with new information, a bigger loop this MVP doesn't build).
- * Reporting revisionOccurred: true without auto-revising is the honest
- * choice: it tells a human reviewer something surfaced, rather than either
- * silently ignoring it (dishonest) or fabricating a revised grade this step
- * didn't actually compute (equally dishonest, in the other direction).
- */
 const ADVERSARIAL_PROMPT = (claim: string, sourceId: string, leadContent: string, violation?: string): string => {
   const base = `You are actively trying to falsify this claim's strongest evidence — a genuine adversarial
 attempt, not a formality. Look for a specific, real weakness: a confound, a missing safeguard,
@@ -37,7 +26,6 @@ interface RawAdversarialResponse {
   weaknessDescription: string;
 }
 
-/** FR-040 (amendment): validates the shape — previously an untyped cast. */
 function validateAdversarial(raw: unknown): { ok: true; value: RawAdversarialResponse } | { ok: false; violation: string } {
   if (typeof raw !== 'object' || raw === null) {
     return { ok: false, violation: 'response was not a JSON object' };
@@ -52,31 +40,64 @@ function validateAdversarial(raw: unknown): { ok: true; value: RawAdversarialRes
   return { ok: true, value: r as RawAdversarialResponse };
 }
 
-function pickLeadOrigin(origins: RetrievedOrigin[], grades: GradingOutput[]): { origin: RetrievedOrigin; grade: GradingOutput } | null {
-  const gradeOrder = ['assertion', 'testimony', 'contemporaneous_record', 'physical_documentary'];
-  let best: { origin: RetrievedOrigin; grade: GradingOutput } | null = null;
+const GRADE_ORDER = ['assertion', 'testimony', 'contemporaneous_record', 'physical_documentary'];
+
+/**
+ * Picks the line worth attacking. Ordering is by BEARING first, then warrant
+ * grade — reversed from the original, which sorted on grade alone.
+ *
+ * Why it changed (2026-09-15): in a live run on "The Great Wall of China is
+ * visible from space with the naked eye." this function selected a NASA ASTER
+ * instrument image as the "strongest surviving evidence" purely because it
+ * graded physical_documentary, even though the diagnosticity step had marked it
+ * `not_applicable` against the claim. The adversarial pass then attacked a line
+ * with no bearing on the claim while the two lines that did bear on it went
+ * untested. Highest warrant is not the same thing as most load-bearing, and it
+ * is the load-bearing line that a steelman has to survive.
+ */
+function pickLeadOrigin(
+  origins: RetrievedOrigin[],
+  grades: GradingOutput[],
+  diagnostics: DiagnosticityOutput[],
+): { origin: RetrievedOrigin; grade: GradingOutput } | null {
+  let best: { origin: RetrievedOrigin; grade: GradingOutput; bears: boolean } | null = null;
   origins.forEach((origin, i) => {
     const grade = grades[i];
     if (!grade || grade.startingGrade === 'assertion') return; // zero-weight rule — not a candidate
-    if (!best || gradeOrder.indexOf(grade.startingGrade) > gradeOrder.indexOf(best.grade.startingGrade)) {
-      best = { origin, grade };
+    // A line with no diagnosticity output yet is treated as bearing on the
+    // claim rather than excluded: absent information should not silently
+    // demote a line out of adversarial testing.
+    const bears = diagnostics[i] === undefined || diagnostics[i]!.markAgainstClaim !== 'not_applicable';
+    if (!best) {
+      best = { origin, grade, bears };
+      return;
+    }
+    if (best.bears !== bears) {
+      if (bears) best = { origin, grade, bears };
+      return;
+    }
+    if (GRADE_ORDER.indexOf(grade.startingGrade) > GRADE_ORDER.indexOf(best.grade.startingGrade)) {
+      best = { origin, grade, bears };
     }
   });
-  return best;
+  if (!best) return null;
+  const { origin, grade } = best;
+  return { origin, grade };
 }
 
 export async function runAdversarialTest(
   claim: string,
   origins: RetrievedOrigin[],
   grades: GradingOutput[],
+  diagnostics: DiagnosticityOutput[],
   llm: LlmClient,
 ): Promise<RemediationResult<AdversarialOutput>> {
-  const lead = pickLeadOrigin(origins, grades);
+  const lead = pickLeadOrigin(origins, grades, diagnostics);
 
   // FR-031: nothing to adversarially test if nothing survived grading —
   // 'untested' is the honest report, never a fabricated 'survived'.
   if (!lead || lead.origin.content === null) {
-    return { ok: true, attempts: [], value: { status: 'untested', revisionOccurred: false } };
+    return { ok: true, attempts: [], value: { status: 'untested', revisionOccurred: false, performed: false } };
   }
 
   const content = lead.origin.content;
@@ -96,7 +117,12 @@ export async function runAdversarialTest(
   // honest report here too: not because no test ran, but because the
   // evidence's Established-worthiness under adversarial pressure isn't
   // confirmed, which is exactly what 'untested''s Probable-capping effect in
-  // 001's engine correctly reflects.
+  // 001's engine correctly reflects. `performed` carries the separate fact
+  // that a test did run, so the ledger's steelman record stays coherent.
   const status: AdversarialStatus = result.value.foundGenuineWeakness ? 'untested' : 'survived';
-  return { ok: true, attempts: result.attempts, value: { status, revisionOccurred: result.value.foundGenuineWeakness } };
+  return {
+    ok: true,
+    attempts: result.attempts,
+    value: { status, revisionOccurred: result.value.foundGenuineWeakness, performed: true },
+  };
 }

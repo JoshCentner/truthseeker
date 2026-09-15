@@ -69,6 +69,53 @@ export async function runOrchestration(
     const classification = unwrap('classify', await classifyClaim(claim, llm));
     stamp('classify');
 
+    // Trees 2, 3 and 4 branch solely on their treeExtension: evaluateTree2,
+    // evaluateTree3 and evaluateTree4 each receive only that object and never
+    // touch the normalized evidence at all. Since assemble-ledger.ts supplies a
+    // fixed conservative extension for every non-simple-factual claim (the MVP
+    // limitation tracked in PROJECT-TRACKER.md), the band for such a claim is a
+    // CONSTANT — provably independent of anything retrieval, grading,
+    // diagnosticity or adversarial testing produce. Measured on 2026-09-15:
+    // deleting every origin from a completed causal ledger, flipping every mark
+    // to favour the claim, or swapping the claim text outright all leave the
+    // band unchanged at 'contested'.
+    //
+    // Running the evidence steps anyway spent real tokens, real latency and
+    // real fetches on input that could not reach the verdict, and printed a
+    // trace that looked like judgment had been done. Skipping them is both
+    // cheaper and more honest; the skip is stamped in the trace so the omission
+    // is visible rather than silent. Remove this branch when real Tree 2/3/4
+    // depth lands.
+    if (classification.primary !== 'simple_factual') {
+      stamp(`skip-evidence-steps:${classification.primary}`);
+      const skippedLedger = assembleLedger({
+        claim,
+        classification,
+        origins: [],
+        grades: [],
+        diagnostics: [],
+        rivals: [],
+        adversarialStatus: 'untested',
+        steelmanPerformed: false,
+        steelmanRevisionOccurred: false,
+        extraordinaryClusterSurvivedAdversarialTesting: classification.isExtraordinary ? false : null,
+      });
+      stamp('assemble-ledger');
+      return {
+        kind: 'completed',
+        ledger: skippedLedger,
+        trace: {
+          runId,
+          requester: options.requester ?? null,
+          modelIds: [llm.modelId],
+          startedAt,
+          completedAt: new Date().toISOString(),
+          steps,
+          remediationAttempts,
+        },
+      };
+    }
+
     // search.ts's discoverCandidates does not go through remediate(): it uses
     // generateWithSearch's grounding metadata, not a structured JSON response
     // to validate, so remediate()'s "parse + validate the LLM's JSON" shape
@@ -98,7 +145,7 @@ export async function runOrchestration(
 
     // US7 (FR-031/FR-032): actively tests the lead evidence rather than
     // defaulting to a fabricated pass.
-    const adversarial = unwrap('adversarial', await runAdversarialTest(claim, origins, grades, llm));
+    const adversarial = unwrap('adversarial', await runAdversarialTest(claim, origins, grades, diagnostics, llm));
     stamp('adversarial');
 
     const extraordinaryClusterSurvivedAdversarialTesting = classification.isExtraordinary ? false : null;
@@ -111,6 +158,7 @@ export async function runOrchestration(
       diagnostics,
       rivals,
       adversarialStatus: adversarial.status,
+      steelmanPerformed: adversarial.performed,
       steelmanRevisionOccurred: adversarial.revisionOccurred,
       extraordinaryClusterSurvivedAdversarialTesting,
     });

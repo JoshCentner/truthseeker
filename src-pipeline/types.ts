@@ -98,6 +98,15 @@ export interface RivalHypothesis {
 export interface AdversarialOutput {
   status: AdversarialStatus;
   revisionOccurred: boolean;
+  /**
+   * Whether the adversarial step actually ran a test, as distinct from what
+   * the test concluded. The two came apart in practice: `status` is set to
+   * 'untested' both when no testable lead evidence existed AND when the test
+   * ran and found a genuine weakness, so deriving "was a steelman performed"
+   * from `status` produced ledgers reading { performed: false,
+   * revisionOccurred: true } — "it never happened, and it changed something".
+   */
+  performed: boolean;
 }
 
 // ---------------------------------------------------------------------------

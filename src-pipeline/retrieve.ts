@@ -3,21 +3,69 @@ import type { CandidateOrigin, FetchRecord, RetrievedOrigin } from './types.js';
 import { appendJsonLine, FETCH_ARCHIVE_FILE } from './storage.js';
 import { classifyDomain } from './registry.js';
 
-const PAYWALL_SNIPPET_MARKERS = [
+const SUBSCRIPTION_MARKERS = [
   'subscribe to continue reading',
   'this content is for subscribers',
   'sign in to read the full article',
   'create a free account to continue',
 ];
 
-/** Accepted FR-014 clarification: a snippet-only paywall response is treated
- * as could_not_retrieve, not a distinct partial state. This heuristic is
- * intentionally conservative — a short response containing subscription
- * language is exactly the "characterization of the source, not the source
- * itself" shape FR-014's rationale describes. */
-function looksLikePaywallSnippet(content: string): boolean {
-  const lower = content.toLowerCase();
-  return PAYWALL_SNIPPET_MARKERS.some((marker) => lower.includes(marker)) && content.length < 500;
+/**
+ * Markers for the other family of walls: consent gates, script requirements and
+ * bot checks. Added 2026-09-15 after a live run fetched
+ * https://pubmed.ncbi.nlm.nih.gov/30831578/ and got HTTP 203 carrying only
+ * "Cookies must be enabled ... reload this page to continue". Because the
+ * status was inside the 2xx range and the body contained no subscription
+ * wording, the origin was recorded as `retrieved` and the cookie notice was
+ * handed to the grading step as if it were the study.
+ */
+const ACCESS_WALL_MARKERS = [
+  'cookies must be enabled',
+  'enable cookies',
+  'please enable javascript',
+  'javascript is required',
+  'javascript is disabled',
+  'verify you are human',
+  'checking your browser',
+  'enable js and disable any ad blocker',
+  'unusual traffic from your computer',
+  'request could not be satisfied',
+];
+
+/**
+ * Visible text length, not raw byte length. The cookie wall above was 5,565
+ * bytes of markup carrying roughly a hundred characters a reader would ever
+ * see, so a threshold over the raw body could not distinguish it from a short
+ * article. Stripping to visible text is what makes the two separable.
+ */
+function visibleText(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Accepted FR-014 clarification: a snippet-only wall is treated as
+ * could_not_retrieve, not a distinct partial state. This heuristic is
+ * intentionally conservative — a short response consisting of nothing but
+ * subscription or access-gate language is exactly the "characterization of the
+ * source, not the source itself" shape FR-014's rationale describes, and
+ * erring toward could_not_retrieve is the safe direction: the origin then
+ * grades as a zero-weight bare assertion instead of lending a wall the warrant
+ * of the document behind it.
+ */
+function looksLikeWall(content: string): boolean {
+  const text = visibleText(content);
+  const lower = text.toLowerCase();
+  if (SUBSCRIPTION_MARKERS.some((marker) => lower.includes(marker)) && text.length < 500) {
+    return true;
+  }
+  return ACCESS_WALL_MARKERS.some((marker) => lower.includes(marker)) && text.length < 1500;
 }
 
 async function fetchOne(candidate: CandidateOrigin): Promise<{ fetch: FetchRecord; content: string | null }> {
@@ -37,7 +85,11 @@ async function fetchOne(candidate: CandidateOrigin): Promise<{ fetch: FetchRecor
     if (!response.ok) {
       return { fetch: record, content: null };
     }
-    if (looksLikePaywallSnippet(body)) {
+    if (looksLikeWall(body)) {
+      // fetch.succeeded stays true: it records whether the HTTP request
+      // succeeded, which it did. Withholding the content is what flips the
+      // ledger's retrievalStatus to could_not_retrieve, which is the field
+      // that carries 'we do not have this source'.
       return { fetch: record, content: null };
     }
     return { fetch: record, content: body };

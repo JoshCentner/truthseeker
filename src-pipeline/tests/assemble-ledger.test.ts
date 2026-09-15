@@ -51,6 +51,7 @@ describe('assembleLedger (FR-033, SC-004)', () => {
       ],
       rivals: [],
       adversarialStatus: 'survived',
+      steelmanPerformed: true,
       steelmanRevisionOccurred: false,
       extraordinaryClusterSurvivedAdversarialTesting: null,
     };
@@ -72,6 +73,7 @@ describe('assembleLedger (FR-033, SC-004)', () => {
       diagnostics: [],
       rivals: [],
       adversarialStatus: 'untested',
+      steelmanPerformed: false,
       steelmanRevisionOccurred: false,
       extraordinaryClusterSurvivedAdversarialTesting: null,
     };
@@ -100,6 +102,7 @@ describe('assembleLedger (FR-033, SC-004)', () => {
       diagnostics: [{ markAgainstClaim: 'not_applicable', marksAgainstRivals: {} }],
       rivals: [],
       adversarialStatus: 'untested',
+      steelmanPerformed: false,
       steelmanRevisionOccurred: false,
       extraordinaryClusterSurvivedAdversarialTesting: null,
     };
@@ -124,6 +127,7 @@ describe('assembleLedger (FR-033, SC-004)', () => {
         diagnostics: [],
         rivals: [],
         adversarialStatus: 'untested',
+        steelmanPerformed: false,
         steelmanRevisionOccurred: false,
         extraordinaryClusterSurvivedAdversarialTesting: null,
       };

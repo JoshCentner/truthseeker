@@ -12,6 +12,16 @@ const HIGHEST_REACHABLE: Record<TreeId, Verdict['band']> = {
 };
 
 /**
+ * Bands that are terminal determinations rather than points on the confidence
+ * ladder. FR-043's "a below-ceiling band carries a capping condition" is about
+ * a band held DOWN by something; a refutation, a burden finding, an
+ * unresolvable and an unfalsifiable screen are conclusions in their own right,
+ * and labelling them "capped with no capping condition recorded" misreports
+ * the trace Principle III requires to be accurate.
+ */
+const TERMINAL_FINDINGS = new Set<Verdict['band']>(['refuted', 'unsupported', 'unresolvable', 'unfalsifiable']);
+
+/**
  * FR-042/FR-043/FR-045/FR-046: attaches tree id and version stamps to a tree's
  * raw result, and asserts (defensively, in addition to each tree's own logic)
  * that a below-ceiling band always carries at least one capping condition.
@@ -25,7 +35,8 @@ export function assembleVerdict(
   // FR-043 applies to a computed, below-ceiling band. A null band (Tree 4's
   // decomposable branch — routed elsewhere, not capped) is exempt: there is
   // no band to cap.
-  const belowCeiling = result.band !== null && result.band !== ceiling;
+  const belowCeiling =
+    result.band !== null && result.band !== ceiling && !TERMINAL_FINDINGS.has(result.band);
   const cappingConditions =
     belowCeiling && result.cappingConditions.length === 0
       ? [{ id: 'CAP-UNSPECIFIED', protocolClause: `band below ${tree}'s ceiling with no capping condition recorded` }]

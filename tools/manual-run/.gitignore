@@ -1,0 +1,5 @@
+# Raw fetched bytes and dumped prompts: large, regenerable, and not evidence.
+# The fetch ARCHIVE (url, status, hash, timestamp) is what the trace relies on,
+# and that lives in runs/fetch-archive.jsonl, not here.
+fetch-cache/
+pending/

@@ -1,0 +1,120 @@
+[
+  {
+    "when": [
+      "You are a pre-flight classifier"
+    ],
+    "kind": "generate",
+    "note": "harm-gate",
+    "text": "{\"outcome\":\"accept\"}"
+  },
+  {
+    "when": [
+      "Classify this claim per AGENT-PROTOCOL-v3.md Step 1"
+    ],
+    "kind": "generate",
+    "note": "classify",
+    "text": "{\"primary\":\"causal\",\"confidence\":\"high\",\"isExtraordinary\":true}"
+  },
+  {
+    "when": [
+      "Propose at least one genuinely plausible alternative explanation"
+    ],
+    "kind": "generate",
+    "note": "rivals",
+    "text": "{\"rivals\":[{\"description\":\"Temporal coincidence rather than causation: the MMR dose falls at roughly 12-15 months, which is also when the behavioural signs of autism characteristically become noticeable to parents, so onset is observed shortly after vaccination with no causal link between them.\",\"plausibilityRelativeToClaim\":\"more_plausible\"},{\"description\":\"Diagnostic expansion and ascertainment explain the rise in recorded autism prevalence that the claim attributes to vaccines: successively broadened diagnostic criteria, routine screening and greater clinical awareness increase recorded cases without any increase in true incidence.\",\"plausibilityRelativeToClaim\":\"more_plausible\"}]}"
+  },
+  {
+    "when": [
+      "Search the web for sources relevant to evaluating this claim"
+    ],
+    "kind": "generateWithSearch",
+    "note": "search",
+    "text": "Sources located covering a nationwide cohort study, an independent quality assessment of a pooled meta-analysis, a public-health agency summary, and a vaccine-alliance explainer.",
+    "groundingUrls": [
+      "https://pubmed.ncbi.nlm.nih.gov/30831578/",
+      "https://www.ncbi.nlm.nih.gov/books/NBK223092/",
+      "https://www.cdc.gov/vaccine-safety/about/autism.html",
+      "https://www.gavi.org/vaccineswork/can-mmr-vaccines-cause-autism"
+    ]
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://pubmed.ncbi.nlm.nih.gov/30831578/\""
+    ],
+    "kind": "generate",
+    "note": "grade:pubmed-cookiewall",
+    "text": "{\"startingGrade\":\"assertion\",\"firedTriggers\":[],\"interestedParty\":false,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Unknown\",\"reasoning\":\"The retrieved bytes are a cookie-consent interstitial (\\\"Cookies must be enabled ... reload this page to continue\\\") and contain no subject matter of any kind. There is no method, no data, no testimony and no record here to grade, so this is bare assertion at best, which carries zero weight at any volume. Reliability is Unknown because nothing in the retrieved content permits verifying a track record.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://www.ncbi.nlm.nih.gov/books/NBK223092/\""
+    ],
+    "kind": "generate",
+    "note": "grade:dare-taylor-2014",
+    "text": "{\"startingGrade\":\"re_testable\",\"firedTriggers\":[{\"direction\":\"downgrade\",\"mechanism\":\"Pre-specification is not evidenced anywhere in the record. Where the pooling protocol (inclusion criteria, exposure definitions, which outcome windows are combined) is chosen after the constituent results are already public, those choices can be made in a direction that produces the reported pooled estimate even if the underlying association were real: excluding a study on a post hoc quality ground, or pooling a broad exposure definition that dilutes a narrow effect, would each move a true positive toward null. Criterion (d) of D1 therefore counts as not met.\"}],\"interestedParty\":false,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Strong\",\"reasoning\":\"A quality-assessed abstract of a pooled analysis. A meta-analysis is a derivative artifact, so per the rubric it is traced through to what it rests on: five cohort studies covering 1,256,407 children and five case-control studies covering 9,920 children, drawn from population registries whose exposure and outcome records are independently maintained. The method and the constituent studies are both named, so the pooling can in principle be re-run by a third party, which is the re-testable tier. The source is an independent review database rather than the authors of the underlying analysis, so no interest attaches.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://www.cdc.gov/vaccine-safety/about/autism.html\""
+    ],
+    "kind": "generate",
+    "note": "grade:cdc",
+    "text": "{\"startingGrade\":\"testimony\",\"firedTriggers\":[],\"interestedParty\":true,\"partyControlledCreationAfterStakesVisible\":true,\"sourceReliabilityGrade\":\"Strong\",\"reasoning\":\"An institutional summary that states conclusions and attributes them to IOM and AHRQ reviews without reproducing data or method. That is a derivative artifact resting on further derivatives, and the rubric caps a dead-end derivative at testimony. Interested party is marked true on the rubric’s own definition rather than as a judgement about accuracy: the publishing body issues the immunisation schedule at issue, so it stands to lose reputationally and politically if the content were false, and the page was authored long after the dispute was visible, hence party-controlled creation after stakes were visible. The same standard would be applied to a manufacturer or an advocacy group publishing the opposite conclusion.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://www.gavi.org/vaccineswork/can-mmr-vaccines-cause-autism\""
+    ],
+    "kind": "generate",
+    "note": "grade:gavi",
+    "text": "{\"startingGrade\":\"testimony\",\"firedTriggers\":[],\"interestedParty\":true,\"partyControlledCreationAfterStakesVisible\":true,\"sourceReliabilityGrade\":\"Mixed\",\"reasoning\":\"An explainer that narrates other studies (a 2002 New England Journal of Medicine cohort of 537,303 Danish children, and a pooled analysis) without presenting their data or method, so it is a dead-end derivative capped at testimony. The publisher is a vaccine alliance whose institutional mission is vaccination coverage, which meets the rubric’s interested-party definition, and the piece postdates the dispute. Reliability is Mixed rather than Strong: the underlying citations check out, but the outlet is mission-aligned advocacy communication rather than an independent review body.\"}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://pubmed.ncbi.nlm.nih.gov/30831578/\""
+    ],
+    "kind": "generate",
+    "note": "diag:pubmed-cookiewall",
+    "text": "{\"claim\":\"not_applicable\",\"rivals\":{\"rival-0\":\"not_applicable\",\"rival-1\":\"not_applicable\"}}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://www.ncbi.nlm.nih.gov/books/NBK223092/\""
+    ],
+    "kind": "generate",
+    "note": "diag:dare-taylor-2014",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"not_applicable\"}}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://www.cdc.gov/vaccine-safety/about/autism.html\""
+    ],
+    "kind": "generate",
+    "note": "diag:cdc",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"not_applicable\"}}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://www.gavi.org/vaccineswork/can-mmr-vaccines-cause-autism\""
+    ],
+    "kind": "generate",
+    "note": "diag:gavi",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"not_applicable\"}}"
+  },
+  {
+    "when": [
+      "You are actively trying to falsify"
+    ],
+    "kind": "generate",
+    "note": "adversarial",
+    "text": "{\"foundGenuineWeakness\":true,\"weaknessDescription\":\"A specific and real limitation, which is not the same as a refutation. (1) The pooled evidence is entirely observational: five cohort and five case-control studies, no randomised allocation anywhere in the set. Vaccination status is not assigned, so it correlates with whatever else distinguishes families who vaccinate on schedule, including healthcare contact, socioeconomic position and baseline health. A healthy-vaccinee effect of that kind biases toward the null, and nothing in this record measures or adjusts it away. (2) Exposure definitions are heterogeneous across the constituent studies, covering MMR specifically, thimerosal specifically, and cumulative vaccine exposure. Pooling a narrow exposure into a broad one dilutes a subgroup effect toward null by construction, so a genuine association confined to one exposure or one susceptible subgroup could survive as a null pooled estimate. (3) Pre-specification of the pooling protocol is not evidenced, so inclusion and exposure-definition choices were available to be made after the constituent results were known. None of this shows the pooled conclusion is wrong, and the registry cohorts are large; it shows the design cannot by itself exclude a small or subgroup-confined effect, which is exactly the residue an adversarial pass should surface rather than wave away.\"}"
+  }
+]

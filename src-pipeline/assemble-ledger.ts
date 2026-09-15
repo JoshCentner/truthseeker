@@ -20,6 +20,7 @@ export interface AssembleLedgerInput {
   diagnostics: DiagnosticityOutput[];
   rivals: RivalHypothesis[];
   adversarialStatus: 'survived' | 'untested';
+  steelmanPerformed: boolean;
   steelmanRevisionOccurred: boolean;
   extraordinaryClusterSurvivedAdversarialTesting: boolean | null;
 }
@@ -97,7 +98,11 @@ export function assembleLedger(input: AssembleLedgerInput): LedgerInput {
     diagnosticityEntries,
     adversarialStatus: input.adversarialStatus,
     silenceFinding: 'none',
-    steelman: { performed: input.adversarialStatus !== 'untested', revisionOccurred: input.steelmanRevisionOccurred },
+    // Reported by the adversarial step itself rather than inferred from
+    // adversarialStatus: 'untested' covers both "no test was possible" and
+    // "the test ran and found something", so it cannot stand in for whether a
+    // steelman happened.
+    steelman: { performed: input.steelmanPerformed, revisionOccurred: input.steelmanRevisionOccurred },
     extraordinaryClusterSurvivedAdversarialTesting: input.extraordinaryClusterSurvivedAdversarialTesting,
     treeExtension: buildTreeExtension(input.classification),
   };

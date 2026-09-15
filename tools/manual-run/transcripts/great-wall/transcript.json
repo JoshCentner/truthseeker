@@ -1,0 +1,112 @@
+[
+  {
+    "when": [
+      "You are a pre-flight classifier"
+    ],
+    "kind": "generate",
+    "note": "harm-gate",
+    "text": "{\"outcome\":\"accept\"}"
+  },
+  {
+    "when": [
+      "Classify this claim per AGENT-PROTOCOL-v3.md Step 1"
+    ],
+    "kind": "generate",
+    "note": "classify",
+    "text": "{\"primary\":\"simple_factual\",\"confidence\":\"high\",\"isExtraordinary\":true}"
+  },
+  {
+    "when": [
+      "Propose at least one genuinely plausible alternative explanation"
+    ],
+    "kind": "generate",
+    "note": "rivals",
+    "text": "{\"rivals\":[{\"description\":\"Reported sightings are misidentifications: observers resolve rivers, roads, canals or other linear landscape features and take them for the Wall, or are recalling telephoto photographs rather than unaided views.\",\"plausibilityRelativeToClaim\":\"more_plausible\"},{\"description\":\"The dispute is definitional rather than factual: 'space' spans altitudes from roughly 100 km to lunar distance, and at the very bottom of that range under ideal contrast (such as snow outlining the wall) some linear feature may be marginally perceptible, so both 'visible' and 'not visible' are defensible readings.\",\"plausibilityRelativeToClaim\":\"more_plausible\"}]}"
+  },
+  {
+    "when": [
+      "Search the web for sources relevant to evaluating this claim"
+    ],
+    "kind": "generateWithSearch",
+    "note": "search",
+    "text": "Sources located covering astronaut observation, the optics of human visual acuity at orbital altitude, an encyclopedic survey of the question, and a peer-reviewed paper arguing the opposite conclusion.",
+    "groundingUrls": [
+      "https://earthobservatory.nasa.gov/images/1455/great-wall-of-china",
+      "https://en.m.wikipedia.org/wiki/Artificial_structures_visible_from_space",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC3972694",
+      "https://www.tandfonline.com/doi/pdf/10.1080/10824000609480619"
+    ]
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://earthobservatory.nasa.gov/images/1455/great-wall-of-china\""
+    ],
+    "kind": "generate",
+    "note": "grade:nasa-aster",
+    "text": "{\"startingGrade\":\"physical_documentary\",\"firedTriggers\":[],\"interestedParty\":false,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Strong\",\"reasoning\":\"An instrument reading: an ASTER (Advanced Spaceborne Thermal Emission and Reflection Radiometer) sub-image with a stated acquisition date (9 January 2001), a stated footprint (12 x 12 km, Northern Shanxi Province), and stated observing conditions (low sun angle, light snow cover). That is a physical/documentary record of what a named sensor recorded, not a summary of someone else’s finding. No downgrade trigger fires on the content alone: there is no quantity presented with false precision, no self-contradiction, and the record is direct output of the instrument rather than a proxy for it. No upgrade trigger is asserted, since replication is not demonstrated in the page itself.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://en.m.wikipedia.org/wiki/Artificial_structures_visible_from_space\""
+    ],
+    "kind": "generate",
+    "note": "grade:wikipedia",
+    "text": "{\"startingGrade\":\"testimony\",\"firedTriggers\":[],\"interestedParty\":false,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Mixed\",\"reasoning\":\"A derivative artifact: an encyclopedia survey that compiles and cites other material rather than reporting anything of its own. Per the rubric, trace through it and grade what it rests on; what it rests on here is chiefly first-person astronaut accounts of what they could and could not resolve, which is testimony. A dead-end derivative never outranks testimony, so testimony is the ceiling. Reliability is Mixed rather than Strong because the source is openly editable and its accuracy varies by article and by revision, which is a verifiable property of the publishing model rather than a judgement about this page.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC3972694\""
+    ],
+    "kind": "generate",
+    "note": "grade:lopez-gil-optometry",
+    "text": "{\"startingGrade\":\"re_testable\",\"firedTriggers\":[],\"interestedParty\":false,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Strong\",\"reasoning\":\"A calculation whose every input and step is stated, so anyone can re-run it: angular subtense of the structure at stated distances, against published limits on human visual acuity from finite foveal cone spacing (limit 2.3, about 20/9) and from pupil diffraction (limit 5, about 20/4 at a 6 mm pupil and 555 nm). It derives the acuity that would be required (about 20/3, 7.7x normal) and cites the primary literature for each constant, including behavioural acuity measurements in raptors. That is re-testable/reproducible, the top of the warrant hierarchy. D2 does not fire: the quantities carry stated derivations and cited sources rather than unexplained precision. No upgrade trigger is asserted, as independent replication is not shown within the source.\"}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://earthobservatory.nasa.gov/images/1455/great-wall-of-china\""
+    ],
+    "kind": "generate",
+    "note": "diag:nasa-aster",
+    "text": "{\"claim\":\"not_applicable\",\"rivals\":{\"rival-0\":\"not_applicable\",\"rival-1\":\"consistent\"}}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://en.m.wikipedia.org/wiki/Artificial_structures_visible_from_space\""
+    ],
+    "kind": "generate",
+    "note": "diag:wikipedia",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"consistent\"}}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC3972694\""
+    ],
+    "kind": "generate",
+    "note": "diag:lopez-gil-optometry",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"inconsistent\"}}"
+  },
+  {
+    "when": [
+      "You are actively trying to falsify",
+      "source-id=\"https://earthobservatory.nasa.gov/images/1455/great-wall-of-china\""
+    ],
+    "kind": "generate",
+    "note": "adversarial:nasa-aster (superseded lead; kept for the record)",
+    "text": "{\"foundGenuineWeakness\":true,\"weaknessDescription\":\"The lead evidence is a remote-sensing product, and using it here conflates instrument detection with unaided human vision. Three specific problems. (1) Wrong instrument: ASTER resolves roughly 15 m per pixel from orbit; the human eye at the same distance does not, so the image establishes that a sensor can distinguish the structure, which is a different proposition from whether an eye can. (2) Selected conditions: the caption itself states the detection depended on a low sun angle and light snow cover, i.e. transient conditions that manufacture edge contrast the structure does not ordinarily have against same-coloured terrain. Evidence gathered under conditions chosen because they maximise the effect cannot be read as evidence about ordinary conditions. (3) Unverified identification: a single 12 x 12 km sub-image is reported as showing the Wall as a black line, with no independent check that the linear feature is the Wall rather than a road, a field boundary, or a ridge shadow, all of which are common in that terrain and would look the same at this resolution. Separately, this origin was selected as the lead only because it carries the highest warrant grade; on the substance it does not bear on unaided visibility at all.\"}"
+  },
+  {
+    "when": [
+      "You are actively trying to falsify",
+      "source-id=\"https://pmc.ncbi.nlm.nih.gov/articles/PMC3972694\""
+    ],
+    "kind": "generate",
+    "note": "adversarial:lopez-gil-optometry",
+    "text": "{\"foundGenuineWeakness\":true,\"weaknessDescription\":\"The calculation may apply the wrong psychophysical criterion, which is a real objection and not a quibble. Visual acuity as used here is a MINIMUM-ANGLE-OF-RESOLUTION measure: the angular separation at which two features are told apart, calibrated on gap-detection targets such as Landolt rings. Detecting the presence of a long, high-contrast linear feature against a contrasting background is a different task with a different and much finer threshold, which is why power lines, contrails and roads are readily seen at distances where their angular width is far below the acuity limit the paper invokes. If line detection rather than two-point resolution is the governing threshold, the derived requirement of roughly 20/3 overstates what the observation would actually demand, and the argument does not go through as stated. Two further gaps. The contrast assumption is generic, whereas the conditions under which the structure is reported as distinguishable are precisely the atypical high-contrast ones, low sun angle and snow outlining the wall, which the model does not treat. And the headline figure and the boundary case are computed at different distances, ISS altitude for one and about 80 km for the other, so they are not directly comparable. None of this shows the conclusion is wrong; the structure is genuinely narrow and genuinely the colour of its surroundings. It shows this particular derivation rests on a criterion choice the source never defends, and a peer-reviewed paper arguing the opposite conclusion on exactly that ground exists and could not be retrieved in this run.\"}"
+  }
+]
