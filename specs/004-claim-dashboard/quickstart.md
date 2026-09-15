@@ -39,7 +39,7 @@ network activity anywhere in this feature's own code is same-origin (`/api/run`)
 
 ```bash
 # Terminal 1
-node --loader tsx dashboard/server.ts
+node --import tsx dashboard/server.ts
 # Terminal 2
 npm run dev
 ```

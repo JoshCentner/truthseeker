@@ -67,7 +67,7 @@ export class MockLlmClient implements LlmClient {
 // the GoogleGenAI client instance for the lifetime of one GeminiLlmClient.
 // ---------------------------------------------------------------------------
 
-const DEFAULT_MODEL_ID = 'gemini-2.5-flash'; // research.md §1 — single tier for this MVP
+const DEFAULT_MODEL_ID = 'gemini-3.6-flash'; // research.md §1 — single tier for this MVP. 2026-09-14: gemini-2.5-flash now 404s for new users; Google's error names 3.6-flash as the replacement.
 
 export class GeminiLlmClient implements LlmClient {
   readonly modelId: string;

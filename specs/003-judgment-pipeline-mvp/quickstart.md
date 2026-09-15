@@ -37,8 +37,8 @@ proves:
 Get a key from Google AI Studio, then:
 
 ```bash
-export GEMINI_API_KEY=your-key-here
-node --loader tsx src-pipeline/cli.ts "The Great Wall of China is visible from space with the naked eye."
+export GEMINI_API_KEY=your-key-here   # or put it in .env (see .env.example) and add --env-file=.env to the node command
+node --import tsx src-pipeline/cli.ts "The Great Wall of China is visible from space with the naked eye."
 ```
 
 **Expected**: within a few minutes, a `PipelineResult` prints to stdout. This is a well-known,
