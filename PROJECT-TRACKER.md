@@ -5,6 +5,9 @@ doesn't get lost between features. Not a replacement for `specs/*/tasks.md` — 
 that don't belong to any single feature's task list, usually because the feature that will need
 them hasn't been specified yet.
 
+The ordered, actionable backlog built from these items (plus reviews and refactors) is
+`TASKS.md`. This file stays the log; that one is the queue.
+
 ## Open
 
 - **Harm-gate review-queue management** — `003-judgment-pipeline-mvp`'s harm gate records a
@@ -41,20 +44,31 @@ them hasn't been specified yet.
   premise that a Flash-tier model is "most likely to stay inside Gemini's free tier" no longer
   holds, and research.md should be amended when someone next touches it. `tools/manual-run/` is the
   keyless interim path. Added 2026-09-15.
-- **Engine 0.2.0 needs methodology review before merge** — the Tree 1 changes described under
-  Resolved below are a methodology change, not app code, and the constitution requires them to go
-  through methodology review separately from ordinary code review. Specifically worth a reviewer's
-  attention: (a) the refutation bar is set by mirroring Established's own floors (2+ opposing
-  clusters, best opposing grade >= contemporaneous_record, no strong silence) — that is a judgement
-  call about how much it should take to call something false, and it is the single most
-  consequential number in the change; (b) refutation deliberately does NOT require
-  `adversarialStatus === 'survived'`, on the grounds that the field describes the claim-supporting
-  lead rather than the counter-evidence, which leaves counter-evidence untested by the steelman;
-  (c) `nonDiagnostic` still only fires for claim-supporting lines, so there is no symmetric notion
-  of an opposing line that fails to discriminate. Added 2026-09-15.
 
 ## Resolved
 
+- **Engine 0.2.0 methodology review** — DECIDED 2026-09-17 by the project owner. The 0.2.0
+  Tree 1 counter-evidence path is NOT approved as written; engine 0.3.0 replaces it. Four rulings:
+  (a) **Refutation bar follows the protocol text, not a mirror of Established.** AGENT-PROTOCOL-v3
+  Tree 1 says Refuted is "a decisive contrary physical/re-testable cluster" — one cluster at
+  `physical_documentary`. 0.2.0 required 2+ opposing clusters at >= `contemporaneous_record`,
+  which is stricter on count and looser on grade than the spec. The engine must reproduce the
+  spec; the mirror is dropped. (b) **Doubtful becomes reachable on Tree 1.** The protocol puts
+  "contrary diagnostic evidence outweighs support on grade or count" at Doubtful; 0.2.0 sent that
+  case to Contested-insufficient and never emitted Doubtful at all. (c) **Refuted-from-evidence
+  requires the counter-evidence to have survived a steelman.** The protocol's Steelman step is
+  one-directional (strongest case AGAINST the claim); nothing tests the contrary evidence, so the
+  mirror rule is not honoured on the Refuted path. Owner chose to block rather than defer: a
+  symmetric step ("strongest case FOR the claim against the contrary evidence") is added to the
+  protocol, a `counterAdversarialStatus` field is added to the schema (version bump + migration),
+  and the pipeline populates it. Until that ships, counter-evidence can carry a claim down to
+  Doubtful but never to Refuted; Refuted stays reachable only by retraction. The Great Wall record
+  will read `refuted -> doubtful` as superseded drift, which is the designed behaviour, not a
+  regression. (d) **The non-diagnostic asymmetry is accepted as correct.** A supporting line must
+  beat the live rivals to count (a line fitting both the claim and a rival is non-diagnostic); an
+  opposing line counts against the claim on its own, because contradicting the claim does not
+  depend on which rival is true. That is Principle II's burden of proof expressed in the
+  diagnosticity rule, not a gap. No symmetric exclusion is built. Build tracked as TASKS.md F-16.
 - **Ledger had no representation of contrary evidence** — RESOLVED in engine 0.2.0, 2026-09-15,
   pending methodology review (see Open). `src/normalize/diagnosticity.ts` marked a line
   `nonDiagnostic` only when its claim mark was `consistent`, so lines marked `inconsistent` counted
