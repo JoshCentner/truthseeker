@@ -106,3 +106,47 @@ them hasn't been specified yet.
   every Refuted, Unsupported, Unresolvable and Unfalsifiable result. Those are determinations, not
   bands held down by something, and mislabelling them degrades exactly the trace Principle III
   requires to be accurate. They are now exempt.
+- **Runs carry four of the six required provenance stamps** — Constitution Principle III requires
+  every run to stamp `protocol_version`, `engine_version`, `registry_version`, `model_ids`, `run_id`
+  and `requester`. `003`'s record schema carries `engine_version`, `schema_version`, `model_ids`,
+  `run_id` and `requester`, but neither `protocol_version` nor `registry_version`. `005`'s report
+  therefore names the two absent stamps on every page rather than presenting a partial provenance as
+  complete, but only `003` can actually close this: it needs a field added to the record, a version
+  bump, and a migration for stored runs under Principle IV. Surfaced while building `005`'s
+  provenance section; see specs/005-claim-corpus-report/research.md §7. Added 2026-09-16.
+- **Aggregator exclusion was never enforced, only suggested** — RESOLVED 2026-09-17, pending
+  methodology review. The constitution's deterministic checks require that "no origin's domain is
+  classed aggregator", and `registry.ts` had classified aggregators since `003` — but nothing acted
+  on the classification. `retrieve.ts` attached the class to the origin and `grade.ts` turned it into
+  a NOTE in the grading prompt asking the model to trace through to the original. The rule was
+  therefore a request addressed to a model rather than a property of the system, which is the exact
+  inversion Principle I exists to prevent, and an aggregator was graded and counted like any other
+  source once the model had read the note. Found because `en.m.wikipedia.org` reached a committed
+  record and carried a live claim to Refuted as one of its two opposing clusters.
+  `src-pipeline/source-policy.ts` now makes it a gate: candidates are screened at discovery before
+  any fetch, and `assembleLedger` asserts downstream of every path that can introduce an origin
+  (including a hand-written manual-run transcript, which is the route the original mistake actually
+  took). Exclusions are recorded on the run trace and shown on the report — a filter nobody can
+  inspect is indistinguishable from a bug. Only the `aggregator` class blocks; `press_release`,
+  `preprint` and `paywalled` are contextual signals and excluding them would discard primary
+  material. Added 2026-09-17.
+- **Registry extension needs methodology review** — 2026-09-17 added tertiary reference works to
+  `SEED_REGISTRY` as `aggregator`: `wikipedia.org` (all language and mobile subdomains),
+  `wikiwand.com`, `britannica.com`, `encyclopedia.com`, `fandom.com`, `scholar.google.com`,
+  `researchgate.net`, plus `yahoo.com` as a news aggregator. The constitution requires registry
+  changes to go through methodology review separately from code review and warns that they are
+  reputation-affecting, so this list wants a reviewer's eye before it is treated as settled. The
+  argument for it being the safe kind of registry change: these are STRUCTURAL classes —
+  definitional statements about what kind of document a domain publishes — not evidential
+  reliability grades. Recording that Wikipedia is a tertiary work containing no original research
+  restates its own core editorial policy and says nothing about whether it is accurate. A reviewer
+  should still confirm each domain individually, and should decide whether `scholar.google.com` and
+  `researchgate.net` belong here or want a distinct "index" treatment. Added 2026-09-17.
+- **Aggregators are refused, not traced through** — the warrant rubric's actual instruction for a
+  derivative source is to trace through it and grade what it rests on. The gate cannot do that: it
+  refuses the aggregator and the original goes uncited unless the search happens to surface it
+  separately. In the Great Wall re-run that cost a real line of evidence — the Wikipedia article
+  cited astronaut statements that were not independently retrieved, and the claim only stayed at
+  Refuted because NASA's own page was found to replace it. Automated retrieval-and-substitution of
+  the specific original an aggregator cites is the proper fix and was already noted as out of scope
+  in `003`; it is now load-bearing rather than a nicety. Added 2026-09-17.

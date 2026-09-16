@@ -4,6 +4,7 @@ import path from 'node:path';
 import { runOrchestration } from '../../src-pipeline/index.js';
 import { evaluate } from '../../src/index.js';
 import { ManualLlmClient, NeedsHumanResponse, type TranscriptEntry } from './manual-client.mjs';
+import { claimIdFor } from '../../src-corpus/identity.js';
 
 const ROOT = process.cwd();
 
@@ -134,9 +135,13 @@ async function main(): Promise<void> {
           recordedAt: new Date().toISOString(),
         },
       };
-      const outDir = path.join(ROOT, 'corpus', 'runs');
+      // 005 restructured the corpus into one directory per claim, with the
+      // claim's identity derived from its canonical restatement. Writing to the
+      // old flat corpus/runs/ would put the record somewhere nothing reads.
+      const claimId = claimIdFor(claim);
+      const outDir = path.join(ROOT, 'corpus', 'claims', claimId, 'runs');
       fs.mkdirSync(outDir, { recursive: true });
-      const outPath = path.join(outDir, `${slug}.${result.trace.runId.slice(0, 8)}.json`);
+      const outPath = path.join(outDir, `${result.trace.runId}.json`);
       fs.writeFileSync(outPath, `${JSON.stringify(record, null, 2)}\n`, 'utf-8');
       console.error(`\n[record] ${path.relative(ROOT, outPath)}`);
       console.error(`[band]   ${verdict.band}${verdict.qualifier ? ` (${verdict.qualifier})` : ''} via ${verdict.tree}`);

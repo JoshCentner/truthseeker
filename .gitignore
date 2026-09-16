@@ -7,4 +7,5 @@ coverage/
 !.env.example
 .DS_Store
 dist-ui/
+dist-site/
 runs/

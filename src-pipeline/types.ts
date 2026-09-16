@@ -136,6 +136,14 @@ export interface RunTrace {
   completedAt: string;
   steps: { step: string; modelId: string; timestamp: string }[];
   remediationAttempts: RemediationAttempt[];
+  /**
+   * Sources the deterministic registry gate refused before they could become
+   * origins (source-policy.ts). Optional so existing stored records stay
+   * readable. Recorded rather than dropped: the constitution requires a
+   * rejection to state the rule that fired, and a filter nobody can inspect is
+   * indistinguishable from a bug.
+   */
+  excludedSources?: { url: string; registryClass: string | null; reason: string }[];
 }
 
 export type PipelineResult =

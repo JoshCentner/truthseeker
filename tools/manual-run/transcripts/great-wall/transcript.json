@@ -29,10 +29,11 @@
     ],
     "kind": "generateWithSearch",
     "note": "search",
-    "text": "Sources located covering astronaut observation, the optics of human visual acuity at orbital altitude, an encyclopedic survey of the question, and a peer-reviewed paper arguing the opposite conclusion.",
+    "text": "Sources located covering astronaut observation, NASA’s own account of the question, the optics of human visual acuity at orbital altitude, and a peer-reviewed paper arguing the opposite conclusion.",
     "groundingUrls": [
       "https://earthobservatory.nasa.gov/images/1455/great-wall-of-china",
       "https://en.m.wikipedia.org/wiki/Artificial_structures_visible_from_space",
+      "https://www.nasa.gov/vision/space/workinginspace/great_wall.html",
       "https://pmc.ncbi.nlm.nih.gov/articles/PMC3972694",
       "https://www.tandfonline.com/doi/pdf/10.1080/10824000609480619"
     ]
@@ -52,7 +53,7 @@
       "source-id=\"https://en.m.wikipedia.org/wiki/Artificial_structures_visible_from_space\""
     ],
     "kind": "generate",
-    "note": "grade:wikipedia",
+    "note": "grade:wikipedia (never requested after 2026-09-17: source blocked by the registry gate)",
     "text": "{\"startingGrade\":\"testimony\",\"firedTriggers\":[],\"interestedParty\":false,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Mixed\",\"reasoning\":\"A derivative artifact: an encyclopedia survey that compiles and cites other material rather than reporting anything of its own. Per the rubric, trace through it and grade what it rests on; what it rests on here is chiefly first-person astronaut accounts of what they could and could not resolve, which is testimony. A dead-end derivative never outranks testimony, so testimony is the ceiling. Reliability is Mixed rather than Strong because the source is openly editable and its accuracy varies by article and by revision, which is a verifiable property of the publishing model rather than a judgement about this page.\"}"
   },
   {
@@ -79,7 +80,7 @@
       "source-id=\"https://en.m.wikipedia.org/wiki/Artificial_structures_visible_from_space\""
     ],
     "kind": "generate",
-    "note": "diag:wikipedia",
+    "note": "diag:wikipedia (never requested after 2026-09-17: source blocked by the registry gate)",
     "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"consistent\"}}"
   },
   {
@@ -108,5 +109,32 @@
     "kind": "generate",
     "note": "adversarial:lopez-gil-optometry",
     "text": "{\"foundGenuineWeakness\":true,\"weaknessDescription\":\"The calculation may apply the wrong psychophysical criterion, which is a real objection and not a quibble. Visual acuity as used here is a MINIMUM-ANGLE-OF-RESOLUTION measure: the angular separation at which two features are told apart, calibrated on gap-detection targets such as Landolt rings. Detecting the presence of a long, high-contrast linear feature against a contrasting background is a different task with a different and much finer threshold, which is why power lines, contrails and roads are readily seen at distances where their angular width is far below the acuity limit the paper invokes. If line detection rather than two-point resolution is the governing threshold, the derived requirement of roughly 20/3 overstates what the observation would actually demand, and the argument does not go through as stated. Two further gaps. The contrast assumption is generic, whereas the conditions under which the structure is reported as distinguishable are precisely the atypical high-contrast ones, low sun angle and snow outlining the wall, which the model does not treat. And the headline figure and the boundary case are computed at different distances, ISS altitude for one and about 80 km for the other, so they are not directly comparable. None of this shows the conclusion is wrong; the structure is genuinely narrow and genuinely the colour of its surroundings. It shows this particular derivation rests on a criterion choice the source never defends, and a peer-reviewed paper arguing the opposite conclusion on exactly that ground exists and could not be retrieved in this run.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://www.nasa.gov/vision/space/workinginspace/great_wall.html\""
+    ],
+    "kind": "generate",
+    "note": "grade:nasa-vision",
+    "text": "{\"startingGrade\":\"physical_documentary\",\"firedTriggers\":[],\"interestedParty\":false,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Strong\",\"reasoning\":\"A photographic record with full provenance: an image of a named location taken by a named individual (Expedition 10 Commander Leroy Chiao) from a named platform (the International Space Station), published by the agency that operates it, together with a statement of the optical conditions under which it was obtained (high-powered lenses). That is a physical/documentary record of an observation actually made, not a summary of someone else’s finding, so it is not a derivative artifact to be traced through. No downgrade trigger fires on the content alone: no quantity is presented with unstated precision, the record does not contradict itself, and the observation is direct rather than a proxy for something else. The page also carries an interpretive sentence about what the photograph implies; that sentence rests on the photograph beside it rather than dangling, so it does not reduce the grade. No upgrade is asserted, since no independent replication is demonstrated within the source.\"}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://www.nasa.gov/vision/space/workinginspace/great_wall.html\""
+    ],
+    "kind": "generate",
+    "note": "diag:nasa-vision",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"not_applicable\"}}"
+  },
+  {
+    "when": [
+      "You are actively trying to falsify",
+      "source-id=\"https://www.nasa.gov/vision/space/workinginspace/great_wall.html\""
+    ],
+    "kind": "generate",
+    "note": "adversarial:nasa-vision",
+    "text": "{\"foundGenuineWeakness\":true,\"weaknessDescription\":\"The photograph and the sentence doing the work are two different things, and only the photograph is a record. (1) The operative claim — that the wall is \\\"difficult or impossible to see from Earth orbit without the high-powered lenses used for this photo\\\" — is an editorial caption, not a measurement. No method is reported: no altitude, no lighting or seasonal conditions, no acuity screening of the observer, and no description of any attempt at unaided observation under controlled conditions. What the image establishes is that a telephoto photograph was successfully taken; the inference that an unaided eye therefore cannot resolve the structure is asserted alongside it rather than demonstrated by it. (2) \\\"Difficult or impossible\\\" is a disjunction spanning two materially different answers to the claim. \\\"Hard but possible under good conditions\\\" and \\\"impossible at any altitude\\\" cannot both be what the evidence shows, and a source whose central finding does not distinguish them cannot settle between them either — which is precisely the question at issue. (3) Single observer, single occasion. One astronaut on one pass under one set of conditions, with no indication that a negative unaided result was recorded as an observation rather than inferred after the fact from the need for a lens. (4) The caption postdates the controversy and the publishing body has a standing public-communication interest in correcting a famous myth. That is an institutional interest rather than a material stake, and it does not make the statement wrong, but it is the kind of interest that belongs on the record when a source is being used to close a question rather than open one. None of this reverses the direction the evidence points; the independent optics calculation reaches the same conclusion by an entirely different route, which is why the two lines corroborate rather than merely repeat. It does mean this particular source is weaker as a lead than its provenance makes it look.\"}"
   }
 ]

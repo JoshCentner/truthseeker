@@ -37,6 +37,7 @@ export async function runOrchestration(
   const startedAt = new Date().toISOString();
   const steps: RunTrace['steps'] = [];
   const remediationAttempts: RemediationAttempt[] = [];
+  const excludedSources: NonNullable<RunTrace['excludedSources']> = [];
   const stamp = (step: string) => {
     steps.push({ step, modelId: llm.modelId, timestamp: new Date().toISOString() });
     options.onProgress?.(step); // 004 (claim-dashboard) amendment — additive, optional
@@ -112,6 +113,7 @@ export async function runOrchestration(
           completedAt: new Date().toISOString(),
           steps,
           remediationAttempts,
+          excludedSources,
         },
       };
     }
@@ -121,10 +123,20 @@ export async function runOrchestration(
     // to validate, so remediate()'s "parse + validate the LLM's JSON" shape
     // doesn't apply — its own MAX_EMPTY_ATTEMPTS loop is a different, already-
     // bounded retry mechanism for a different problem (finding more sources).
-    const candidates = await discoverCandidates(claim, llm);
+    const discovery = await discoverCandidates(claim, llm);
+    excludedSources.push(
+      ...discovery.excluded.map((e) => ({
+        url: e.url,
+        registryClass: e.registryClass,
+        reason: e.reason ?? 'blocked by the structural source registry',
+      })),
+    );
     stamp('search');
+    if (discovery.excluded.length > 0) {
+      stamp(`source-gate:excluded-${discovery.excluded.length}`);
+    }
 
-    const origins = await retrieveAll(candidates);
+    const origins = await retrieveAll(discovery.candidates);
     stamp('retrieve');
 
     const grades = await Promise.all(
@@ -172,6 +184,7 @@ export async function runOrchestration(
       completedAt: new Date().toISOString(),
       steps,
       remediationAttempts,
+      excludedSources,
     };
 
     return { kind: 'completed', ledger, trace };

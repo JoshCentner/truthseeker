@@ -11,6 +11,7 @@ import { SCHEMA_VERSION } from '../src/index.js';
 import type { RetrievedOrigin, GradingOutput, DiagnosticityOutput, RivalHypothesis } from './types.js';
 import type { ClassificationResult } from './classify.js';
 import { detectRetractionOrCorrection } from './grade.js';
+import { assertNoBlockedOrigins } from './source-policy.js';
 
 export interface AssembleLedgerInput {
   claim: string;
@@ -35,6 +36,12 @@ export interface AssembleLedgerInput {
  * refusalReason (SC-004), which is the actual guarantee that matters.
  */
 export function assembleLedger(input: AssembleLedgerInput): LedgerInput {
+  // The hard gate. Downstream of every path that can introduce an origin —
+  // search results, a hand-written manual-run transcript, any future importer —
+  // so the guarantee holds regardless of who supplied the source. Filtering at
+  // discovery is the cheap path; this is the one that makes it a guarantee.
+  assertNoBlockedOrigins(input.origins.map((o) => o.id));
+
   const origins: Origin[] = input.origins.map((o) => {
     const retraction = o.content ? detectRetractionOrCorrection(o.content) : { retracted: false, noted: false };
     return {

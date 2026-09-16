@@ -8,7 +8,7 @@ describe('search (FR-011, FR-015, FR-016)', () => {
       { generateWithSearch: { text: 'found one', groundingUrls: ['https://a.example.com/x'] } },
       { generateWithSearch: { text: 'found another', groundingUrls: ['https://b.example.com/y'] } },
     ]);
-    const candidates = await discoverCandidates('some claim', llm);
+    const { candidates } = await discoverCandidates('some claim', llm);
     expect(candidates.length).toBe(2);
     expect(llm.receivedPrompts.length).toBe(2); // stopped immediately after reaching the threshold
   });
@@ -19,7 +19,7 @@ describe('search (FR-011, FR-015, FR-016)', () => {
       { generateWithSearch: { text: 'nothing', groundingUrls: [] } },
       { generateWithSearch: { text: 'nothing', groundingUrls: [] } },
     ]);
-    const candidates = await discoverCandidates('an obscure claim', llm);
+    const { candidates } = await discoverCandidates('an obscure claim', llm);
     expect(candidates.length).toBe(0);
     expect(llm.receivedPrompts.length).toBe(3);
   });
@@ -30,7 +30,7 @@ describe('search (FR-011, FR-015, FR-016)', () => {
       { generateWithSearch: { text: '', groundingUrls: [] } },
       { generateWithSearch: { text: '', groundingUrls: [] } },
     ]);
-    const candidates = await discoverCandidates('nothing exists about this', llm);
+    const { candidates } = await discoverCandidates('nothing exists about this', llm);
     expect(candidates).toEqual([]);
   });
 
@@ -41,7 +41,7 @@ describe('search (FR-011, FR-015, FR-016)', () => {
       { generateWithSearch: { text: '', groundingUrls: [] } },
       { generateWithSearch: { text: '', groundingUrls: [] } },
     ]);
-    const candidates = await discoverCandidates('claim', llm);
+    const { candidates } = await discoverCandidates('claim', llm);
     expect(candidates.length).toBe(1);
   });
 });
