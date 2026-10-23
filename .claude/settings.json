@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(perl -i -0pe 's/`tree1-refuted-adversarial-failed` \\\\\\(FR-020\\\\\\) and new `tree1-doubtful-strong-silence` \\\\\\(FR-015\\\\\\)\\\\. And new\\\\n  `aggregate-doubtful-below-contested` \\\\\\(FR-038\\\\\\)\\\\./`tree1-refuted-adversarial-failed` \\(FR-020\\), whose ledger must carry the cited attempt as an\\\\n  origin \\(FR-020a\\); new `tree1-doubtful-strong-silence` \\(FR-015\\); and new\\\\n  `aggregate-doubtful-below-contested` \\(FR-038\\)./' /c/Users/joshc/AppData/Local/Temp/claude/c--ZenDrive-My-Apps-Truthseeker/887fecc3-d414-41ac-a315-a4d2faca54c6/scratchpad/q2.pl)",
+      "Bash(perl -i -0pe 's/\\\\$s =~ s\\\\/\\\\\\(new `tree1-refuted-adversarial-failed` \\\\\\\\\\\\\\(FR-020\\\\\\\\\\\\\\)\\\\\\)\\\\/\\\\$1 \\\\. \" — whose ledger must carry the cited\\\\\\\\n  attempt as an origin \\\\\\(FR-020a\\\\\\)\"\\\\/e or die \"fixture\";\\\\n//' /c/Users/joshc/AppData/Local/Temp/claude/c--ZenDrive-My-Apps-Truthseeker/887fecc3-d414-41ac-a315-a4d2faca54c6/scratchpad/q2.pl)",
+      "PowerShell(node --import tsx tools/manual-run/run.mts \"In 2016, 80% of the world's wealth was owned by 80 people; in 2026 it is owned by 8 people.\" --slug wealth-80-to-8)",
+      "Bash(node probe.mjs https://www.oxfam.org/en/press-releases/richest-1-will-own-more-all-rest-2016 https://oxfam.org.hk/en/news-and-publication/billionaire-wealth-jumps-three-times-faster-in-2025-to-its-highest-peak-ever-oxfam-hong-kong-urges-stepped-up-action https://www.oxfam.org/en/press-releases/billionaire-wealth-jumps-three-times-faster-2025-its-highest-peak-ever)",
+      "Bash(node grepurl.mjs \"https://oxfam.org.hk/en/news-and-publication/billionaire-wealth-jumps-three-times-faster-in-2025-to-its-highest-peak-ever-oxfam-hong-kong-urges-stepped-up-action\" \"trillion\" \"richest\" \"half\")",
+      "Bash(node grepurl.mjs \"https://www.ubs.com/global/en/media/display-page-ndp/en-20260630-gwr-2026.html\" \"trillion\" \"10\\\\.8\")",
+      "Bash(node grepurl.mjs \"https://www.oxfam.org/en/press-releases/just-8-men-own-same-wealth-half-world\" \"eight men|8 men\" \"426\" \"Credit Suisse\")",
+      "Bash(node grepurl.mjs \"https://www.oxfam.org/en/press-releases/richest-1-will-own-more-all-rest-2016\" \"80 \" \"48\")",
+      "PowerShell($s='C:\\\\Users\\\\joshc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--ZenDrive-My-Apps-Truthseeker\\\\1e4065d3-f83c-470e-a265-a4ff24b1183c\\\\scratchpad'; node \"$s\\\\add.mjs\" tools/manual-run/transcripts/wealth-80-to-8/transcript.json \"$s\\\\adv.json\"; node --import tsx tools/manual-run/run.mts \"In 2016, 80% of the world's wealth was owned by 80 people; in 2026 it is owned by 8 people.\" --slug wealth-80-to-8 > \"$s\\\\run-out.txt\" 2> \"$s\\\\run-err.txt\"; \"exit $LASTEXITCODE\"; Get-Content \"$s\\\\run-err.txt\" | Select-Object -Last 12)",
+      "PowerShell($s='C:\\\\Users\\\\joshc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--ZenDrive-My-Apps-Truthseeker\\\\1e4065d3-f83c-470e-a265-a4ff24b1183c\\\\scratchpad'; $t = Get-Content \"$s\\\\run-out.txt\" -Raw; $i = $t.IndexOf\\('=== evaluate'\\); $t.Substring\\($i\\); Select-String -Path \"$s\\\\run-out.txt\" -Pattern '\"note\"|adversarial|leadOrigin|excluded' | Select-Object -First 20 | ForEach-Object { $_.Line.Trim\\(\\) })",
+      "PowerShell($r = Get-Content corpus/claims/in-2016-80-of-the-world-s-wealth-was-owned-by-020e0082/runs/6701836a-c37e-4384-b688-61762dc4bd0d.json -Raw | ConvertFrom-Json; $r.result.ledger | ConvertTo-Json -Depth 4 | Select-String -Pattern 'cluster|adversarial|origin|grade|relationship' | Select-Object -First 60 | ForEach-Object { $_.Line })",
+      "PowerShell(node --import tsx src-corpus/cli.ts in-2016-80-of-the-world-s-wealth-was-owned-by-020e0082 2>&1)",
+      "PowerShell($p='dist-site/claims/in-2016-80-of-the-world-s-wealth-was-owned-by-020e0082.html'; \\(Get-Item $p\\).Length; Get-ChildItem dist-site -Recurse | Select-Object -ExpandProperty FullName)",
+      "PowerShell(node --import tsx src-corpus/cli.ts in-2016-80-of-the-world-s-wealth-was-owned-by-020e0082)",
+      "Bash(node scripts/validate_palette.js \"#b5452b,#2d6f8e\" --mode light)",
+      "Bash(node scripts/validate_palette.js \"#e0775a,#6aaed0\" --mode dark)",
+      "Bash(node scripts/validate_palette.js \"#b5452b,#1f6fae\" --mode light)",
+      "Bash(node scripts/validate_palette.js \"#c4583d,#3b86c4\" --mode dark --surface \"#17191c\")"
+    ]
+  }
+}

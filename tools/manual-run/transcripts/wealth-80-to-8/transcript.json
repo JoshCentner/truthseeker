@@ -1,0 +1,186 @@
+[
+  {
+    "when": [
+      "You are a pre-flight classifier"
+    ],
+    "kind": "generate",
+    "note": "harm-gate",
+    "text": "{\"outcome\":\"accept\"}"
+  },
+  {
+    "when": [
+      "Classify this claim per AGENT-PROTOCOL-v3.md Step 1"
+    ],
+    "kind": "generate",
+    "note": "classify",
+    "text": "{\"primary\":\"simple_factual\",\"confidence\":\"high\",\"isExtraordinary\":true}"
+  },
+  {
+    "when": [
+      "Search the web for sources relevant to evaluating this claim"
+    ],
+    "kind": "generateWithSearch",
+    "note": "search",
+    "text": "Sources located: the three Oxfam Davos releases that originated the '80 people' (January 2015), '62 people' (January 2016) and '8 men' (January 2017) figures, each stating what the comparison actually was and what data it was computed from; Oxfam's January 2026 release giving current billionaire wealth; UBS's June 2026 Global Wealth Report release on total personal wealth; and an independent 2016 fact-check of the '80 richest' figure's method.",
+    "groundingUrls": [
+      "https://www.oxfam.org/en/press-releases/richest-1-will-own-more-all-rest-2016",
+      "https://www.oxfam.org/en/press-releases/62-people-own-same-half-world-reveals-oxfam-davos-report",
+      "https://www.oxfam.org/en/press-releases/just-8-men-own-same-wealth-half-world",
+      "https://oxfam.org.hk/en/news-and-publication/billionaire-wealth-jumps-three-times-faster-in-2025-to-its-highest-peak-ever-oxfam-hong-kong-urges-stepped-up-action",
+      "https://www.ubs.com/global/en/media/display-page-ndp/en-20260630-gwr-2026.html",
+      "https://www.politifact.com/factchecks/2016/feb/17/bernie-sanders/pretty-much-money-sanders-says-80-richest-own-more/"
+    ]
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://www.oxfam.org/en/press-releases/richest-1-will-own-more-all-rest-2016\""
+    ],
+    "kind": "generate",
+    "note": "grade:oxfam-2015-80-people",
+    "text": "{\"startingGrade\":\"re_testable\",\"firedTriggers\":[{\"direction\":\"downgrade\",\"mechanism\":\"D2: the headline count ('80' people) and shares ('48 percent', '5.5 percent') are point figures with no stated interval, derived by dividing a modelled global wealth distribution (Credit Suisse databook) against Forbes net-worth estimates. Both inputs are estimates, and the release itself shows how sensitive the count is: a Credit Suisse methodology change alone moved the prior year's '85' to '90'. A count with that sensitivity, stated without an interval, can report a precise-looking number the underlying data does not pin down.\"}],\"interestedParty\":true,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Mixed\",\"reasoning\":\"An advocacy organisation's release summarising its own research paper. Traced through, it rests on two named, public, retrievable datasets (Credit Suisse Global Wealth Databook 2013/2014; Forbes billionaires list, March) and a stated method (sum billionaire net worths until they equal the bottom-half total), so anyone can re-run it: re-testable. D2 fires once, as described. The publisher campaigns on inequality and gains politically and reputationally if the figures are believed; under the rubric re-testable evidence takes no discount but the interest is noted. Reliability Mixed: the data sourcing is transparent and the method is simple, but the release carries a campaigning frame and its counts are revised year to year with methodology changes.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://www.oxfam.org/en/press-releases/62-people-own-same-half-world-reveals-oxfam-davos-report\""
+    ],
+    "kind": "generate",
+    "note": "grade:oxfam-2016-62-people",
+    "text": "{\"startingGrade\":\"re_testable\",\"firedTriggers\":[{\"direction\":\"downgrade\",\"mechanism\":\"D2: '62' is a point count with no interval, obtained by matching Forbes net-worth estimates against a modelled bottom-half total. The bottom-half figure is a small residual (roughly a trillion-plus dollars) of a much larger modelled distribution, so modest revisions to how low-income countries' wealth is estimated move the count by large multiples. Stating it to the unit with no interval can present a number far more precise than its inputs support.\"}],\"interestedParty\":true,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Mixed\",\"reasoning\":\"Release summarising Oxfam's 'An Economy for the 1%'. Rests on named public data (Credit Suisse databooks, Forbes March list) with a stated method, a year-by-year series (388, 177, 159, 92, 80, 62) and a disclosed robustness check on negative wealth (1% share 50.1% vs 49.8% excluding debt): re-testable. D2 fires once. The publisher is an interested party (campaigning organisation), noted without discount at this grade. Reliability Mixed for the same reasons as its other inequality releases: transparent sourcing, campaigning framing, counts that move materially with input revisions.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://www.oxfam.org/en/press-releases/just-8-men-own-same-wealth-half-world\""
+    ],
+    "kind": "generate",
+    "note": "grade:oxfam-2017-8-men",
+    "text": "{\"startingGrade\":\"re_testable\",\"firedTriggers\":[{\"direction\":\"downgrade\",\"mechanism\":\"D2: 'eight men' is an unintervalled point count from modelled inputs, and the source itself demonstrates the instability: new India/China data would have turned its previous year's '62' into '9', a roughly seven-fold change from a data revision alone. An estimate whose own author documents swings of that size, then restated to the unit with no interval, is imprecision presented as precision.\"}],\"interestedParty\":true,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Mixed\",\"reasoning\":\"Release summarising 'An economy for the 99 percent'. Names its inputs (Credit Suisse Global Wealth Databook 2016; Forbes list, March 2016), lists the eight individuals and their net worths (summing to about $426 billion), and links a methodology document: re-testable. Its candour about the revision of its own earlier figure is to its credit, and also the basis for D2. Interested party (campaigning organisation), noted without discount. Reliability Mixed.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://oxfam.org.hk/en/news-and-publication/billionaire-wealth-jumps-three-times-faster-in-2025-to-its-highest-peak-ever-oxfam-hong-kong-urges-stepped-up-action\""
+    ],
+    "kind": "generate",
+    "note": "grade:oxfam-hk-2026",
+    "text": "{\"startingGrade\":\"testimony\",\"firedTriggers\":[],\"interestedParty\":true,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Mixed\",\"reasoning\":\"A national affiliate's release relaying headline figures from 'a new Oxfam report' ($18.3 trillion billionaire wealth; a $2.5 trillion rise 'almost equivalent' to the bottom half's wealth; 4.1 billion people). Unlike the international releases, this page names no dataset, gives no method and links no notes, so the figures cannot be re-run from the page: a derivative whose basis is not shown. Graded at the testimony ceiling as an organisation reporting its own research findings. Because the publisher is an interested party, under the rubric that testimony carries corroboration value only. No downgrade triggers are separately recorded since the grade already reflects the missing method. Reliability Mixed.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://www.ubs.com/global/en/media/display-page-ndp/en-20260630-gwr-2026.html\""
+    ],
+    "kind": "generate",
+    "note": "grade:ubs-gwr-2026",
+    "text": "{\"startingGrade\":\"physical_documentary\",\"firedTriggers\":[{\"direction\":\"downgrade\",\"mechanism\":\"D2: growth (10.8%), per-adult averages and medians are given to the dollar or decimal with no interval, although the release states the 56 covered markets are only 'estimated' to represent over 92% of world wealth, so part of the global picture is modelled rather than measured. Unintervalled estimates built partly on imputation can overstate how precisely global wealth is known.\"}],\"interestedParty\":true,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Strong\",\"reasoning\":\"Release for the 17th edition of a long-running annual wealth series (the successor to the Credit Suisse Global Wealth Report). It rests on household balance-sheet statistics compiled across 56 markets and published as a table of per-adult average and median wealth: a documentary statistical record rather than a re-runnable dataset, since the model and full inputs are not on the page. D2 fires once. UBS is a wealth manager and the release doubles as marketing, so it is an interested party; noted, no discount at this grade. Reliability Strong: a long-running series that independent analysts and fact-checkers use as the reference estimate of global household wealth.\"}"
+  },
+  {
+    "when": [
+      "Grade this origin's evidentiary warrant",
+      "source-id=\"https://www.politifact.com/factchecks/2016/feb/17/bernie-sanders/pretty-much-money-sanders-says-80-richest-own-more/\""
+    ],
+    "kind": "generate",
+    "note": "grade:politifact-2016",
+    "text": "{\"startingGrade\":\"re_testable\",\"firedTriggers\":[],\"interestedParty\":false,\"partyControlledCreationAfterStakesVisible\":false,\"sourceReliabilityGrade\":\"Strong\",\"reasoning\":\"A fact-check, so a derivative to be traced through. It traces to the Credit Suisse Global Wealth Databook (total personal wealth about $263 trillion; bottom half 0.72%, about $1.7 trillion, citing page 110) and to the Forbes list, and reconstructs the method by which the comparison was made. Those inputs are public and the arithmetic is stated, so what it rests on is re-testable. It also records on-the-record economists (Davies, Beardsley, Santaeulalia-Llopis, Milanovic) assessing the data's limits, including the debt/negative-net-worth objection. No D2: the piece explicitly says the true count could differ (e.g. 160) rather than overstating precision. No interest in the outcome. Reliability Strong: a named, sourced, published methodology with a full source list.\"}"
+  },
+  {
+    "when": [
+      "Propose at least one genuinely plausible alternative explanation"
+    ],
+    "kind": "generate",
+    "note": "rivals",
+    "text": "{\"rivals\":[{\"description\":\"The claim is a garbled retelling of Oxfam's annual Davos comparisons. Those said that a small number of the richest people own as much as the poorest HALF of humanity, a group holding well under 1% of global wealth, not that they own 80% of all wealth. The counts and dates have also drifted: '80' was Oxfam's January 2015 figure, the 2016 figure was 62, and 'eight' was the January 2017 figure, so the eight-person comparison dates from 2017, not 2026.\",\"plausibilityRelativeToClaim\":\"more_plausible\"},{\"description\":\"The '80%' is borrowed from a different statistic about population shares, such as the richest 1% holding about half of global wealth, or 'the other 80 percent of people share just 5.5 percent'. It was then fused with a headcount of billionaires. On this reading no source ever said a few dozen or a handful of individuals owned four-fifths of the world's wealth; the top individuals' combined fortunes are a small single-digit percentage of global household wealth.\",\"plausibilityRelativeToClaim\":\"more_plausible\"}]}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://www.oxfam.org/en/press-releases/richest-1-will-own-more-all-rest-2016\""
+    ],
+    "kind": "generate",
+    "note": "diag:oxfam-2015-80-people",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"consistent\"}}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://www.oxfam.org/en/press-releases/62-people-own-same-half-world-reveals-oxfam-davos-report\""
+    ],
+    "kind": "generate",
+    "note": "diag:oxfam-2016-62-people",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"consistent\"}}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://www.oxfam.org/en/press-releases/just-8-men-own-same-wealth-half-world\""
+    ],
+    "kind": "generate",
+    "note": "diag:oxfam-2017-8-men",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"not_applicable\"}}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://oxfam.org.hk/en/news-and-publication/billionaire-wealth-jumps-three-times-faster-in-2025-to-its-highest-peak-ever-oxfam-hong-kong-urges-stepped-up-action\""
+    ],
+    "kind": "generate",
+    "note": "diag:oxfam-hk-2026",
+    "text": "{\"claim\":\"not_applicable\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"not_applicable\"}}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://www.ubs.com/global/en/media/display-page-ndp/en-20260630-gwr-2026.html\""
+    ],
+    "kind": "generate",
+    "note": "diag:ubs-gwr-2026",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"not_applicable\",\"rival-1\":\"consistent\"}}"
+  },
+  {
+    "when": [
+      "mark this origin's relationship as exactly one",
+      "source-id=\"https://www.politifact.com/factchecks/2016/feb/17/bernie-sanders/pretty-much-money-sanders-says-80-richest-own-more/\""
+    ],
+    "kind": "generate",
+    "note": "diag:politifact-2016",
+    "text": "{\"claim\":\"inconsistent\",\"rivals\":{\"rival-0\":\"consistent\",\"rival-1\":\"consistent\"}}"
+  },
+  {
+    "when": [
+      "You are actively trying to falsify",
+      "source-id=\"https://www.oxfam.org/en/press-releases/richest-1-will-own-more-all-rest-2016\""
+    ],
+    "kind": "generate",
+    "note": "adversarial:oxfam-2015-80-people",
+    "text": "{\"foundGenuineWeakness\":true,\"weaknessDescription\":\"Three real weaknesses, none of which reverses the direction of the evidence. (1) Temporal mismatch: the release reports end-2014 data (Forbes March 2014, Credit Suisse 2014) and only PROJECTS the 1% share for 2016, so it does not directly measure the year the claim names. A defender of the claim could say 2016 is simply not observed here. (2) Modelled inputs: the bottom-half and top-1% shares come from a modelled global distribution that imputes wealth for data-poor countries and counts negative net worth (debt), so households in rich countries with mortgages or student loans can land in the 'poorest' groups. Both features distort the shares at the bottom, and the release concedes its counts shift with methodology (85 became 90 on re-estimation). (3) The publisher is a campaigning organisation that chose the comparison. However, the refuting inference does not depend on precision at the bottom. If roughly 48 million adults (the top 1%) hold about half of global wealth, then 80 individuals cannot hold 80% of it. That would require them to hold more than the entire top 1% does, and it is off by roughly two orders of magnitude from the release's own figure ($1.9 trillion for the richest 80, under 1% of a total in the hundreds of trillions). The weaknesses reduce confidence in the exact counts, not in the refutation.\"}"
+  },
+  {
+    "when": [
+      "You are actively trying to falsify",
+      "source-id=\"https://www.oxfam.org/en/press-releases/62-people-own-same-half-world-reveals-oxfam-davos-report\""
+    ],
+    "kind": "generate",
+    "note": "adversarial:oxfam-2016-62-people",
+    "text": "{\"foundGenuineWeakness\":true,\"weaknessDescription\":\"The '62' figure was later disowned by its own author: Oxfam's January 2017 release says that with better India/China data the same comparison would have produced 9, not 62. So the specific count this source asserts for the year the claim names is wrong by a factor of about seven, and the source's bottom-half wealth estimate was materially too high. The negative-net-worth issue (indebted rich-country households counted as 'poor') also remains, despite the disclosed robustness check on the 1% share. Against the claim, though, the error runs the wrong way to help it. The revision makes the bottom half poorer, so it lowers the number of rich people needed to match it. It does not raise the share of global wealth those people hold. The richest 62's stated $1.76 trillion stays a small fraction of a global total in the hundreds of trillions, and the 1% share of about 50% caps what any few dozen individuals could hold far below 80%.\"}"
+  },
+  {
+    "when": [
+      "You are actively trying to falsify",
+      "source-id=\"https://www.oxfam.org/en/press-releases/just-8-men-own-same-wealth-half-world\""
+    ],
+    "kind": "generate",
+    "note": "adversarial:oxfam-2017-8-men",
+    "text": "{\"foundGenuineWeakness\":true,\"weaknessDescription\":\"The source's own admission that a single data revision moved its previous count from 62 to 9 shows the headline count is unstable: 'eight' could as easily be five or fifteen under the next revision. It also depends on Credit Suisse's treatment of negative net worth, which places indebted but well-off households among the world's poorest and so shrinks the bottom-half total the eight are matched against. Its date also cuts against using it as a 2026 statement either way: it describes March 2016 Forbes data, which is precisely why the claim's '8 in 2026' looks like a misdated version of it. None of this rescues the claim. The eight named fortunes sum to about $426 billion, a fraction of one percent of global household wealth, so the source cannot be read as eight people owning 80% of anything global.\"}"
+  },
+  {
+    "when": [
+      "You are actively trying to falsify",
+      "source-id=\"https://www.politifact.com/factchecks/2016/feb/17/bernie-sanders/pretty-much-money-sanders-says-80-richest-own-more/\""
+    ],
+    "kind": "generate",
+    "note": "adversarial:politifact-2016",
+    "text": "{\"foundGenuineWeakness\":true,\"weaknessDescription\":\"The fact-check is not independent of the thing it checks in the way that matters: it re-derives Oxfam's figure from the same two inputs Oxfam used (the Credit Suisse databook and the Forbes list) rather than from a separate wealth-distribution estimate. Corroboration from Allianz and BCG covers only total financial wealth, not the bottom-half share. So any systematic error in Credit Suisse's modelling of the bottom of the distribution passes through both untouched. Its experts also flag that the databook may underestimate wealth in low-income countries, and that net worth is a poor poverty proxy. Those weaknesses bear on the bottom-half comparison, though, not on the scale needed here. Its anchor figures, total personal wealth of about $263 trillion and the richest 80 near $1.7 to 1.9 trillion, put the richest 80 at under 1% of the total. Even large errors at the bottom of the distribution cannot move that toward 80%.\"}"
+  }
+]
